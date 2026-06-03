@@ -1,0 +1,509 @@
+SPORTMEET PROJECT HANDOVER AND CONTINUATION NOTES
+Generated locally: 2026-05-27
+
+1. LOCAL RUNNING LINKS
+
+Frontend app:
+http://127.0.0.1:5000/
+
+Login page:
+http://127.0.0.1:5000/login
+
+Admin dashboard:
+http://127.0.0.1:5000/admin
+
+Django backend admin:
+http://127.0.0.1:8000/admin/
+
+Backend API base:
+http://127.0.0.1:8000/api/
+
+Backend health check:
+http://127.0.0.1:8000/api/core/health/
+
+Useful public pages:
+http://127.0.0.1:5000/venues
+http://127.0.0.1:5000/events
+http://127.0.0.1:5000/sports
+http://127.0.0.1:5000/register
+http://127.0.0.1:5000/register-venue-owner
+http://127.0.0.1:5000/register-venue
+
+Useful user / venue-owner pages:
+http://127.0.0.1:5000/dashboard
+http://127.0.0.1:5000/profile
+http://127.0.0.1:5000/bookings
+http://127.0.0.1:5000/venues/manage
+http://127.0.0.1:5000/bookings/venue
+
+Useful admin pages:
+http://127.0.0.1:5000/admin
+http://127.0.0.1:5000/admin/analytics
+http://127.0.0.1:5000/admin/users
+http://127.0.0.1:5000/admin/users/venue-owners
+http://127.0.0.1:5000/admin/venues
+http://127.0.0.1:5000/admin/venues/create
+http://127.0.0.1:5000/admin/venues/sports
+http://127.0.0.1:5000/admin/venues/amenities
+http://127.0.0.1:5000/admin/bookings
+http://127.0.0.1:5000/admin/events
+http://127.0.0.1:5000/admin/events/create
+http://127.0.0.1:5000/admin/events/bookings
+http://127.0.0.1:5000/admin/payments
+http://127.0.0.1:5000/admin/reviews
+http://127.0.0.1:5000/admin/activity-log
+http://127.0.0.1:5000/admin/discounts
+http://127.0.0.1:5000/admin/settings
+http://127.0.0.1:5000/admin/social-keys
+
+Note: If PowerShell tests a frontend route directly, it may return "Cannot GET /admin" because it does not send browser-like HTML headers. The same route works in a browser. I verified this using an Accept: text/html request.
+
+2. LOGIN CREDENTIALS
+
+Admin user:
+Email: admin@sportmeet.com
+Password: admin123
+Role: admin / superuser
+
+Venue owner:
+Email: owner@sportmeet.com
+Password: owner123
+Role: venue_owner
+
+Player:
+Email: player@sportmeet.com
+Password: player123
+Role: player
+
+Extra demo players:
+Email: sam.player@sportmeet.com
+Password: player123
+
+Email: mia.player@sportmeet.com
+Password: player123
+
+3. CURRENT LOCAL SETUP
+
+Project path:
+D:\sportsmeet\sportmeet-main
+
+Frontend:
+React 18, Create React App, React Router, React Query, Tailwind CSS, Axios.
+
+Backend:
+Django 4.2.7, Django REST Framework, token auth, django-allauth, oauth-toolkit, Stripe integration, Celery/Redis packages.
+
+Local database:
+SQLite is enabled for local development.
+Database file:
+D:\sportsmeet\sportmeet-main\backend\db.sqlite3
+
+Important local env files:
+D:\sportsmeet\sportmeet-main\.env.local
+D:\sportsmeet\sportmeet-main\backend\.env
+
+Frontend local API setting:
+REACT_APP_API_URL=http://127.0.0.1:8000/api
+
+Backend local DB setting:
+DB_ENGINE=sqlite
+SQLITE_DB_PATH=db.sqlite3
+
+Local backend virtual environment:
+D:\sportsmeet\sportmeet-main\backend\venv
+
+Demo seed script:
+D:\sportsmeet\sportmeet-main\backend\seed_demo_data.py
+
+Run backend manually:
+cd D:\sportsmeet\sportmeet-main\backend
+venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+
+Run frontend manually:
+cd D:\sportsmeet\sportmeet-main
+npm.cmd start
+
+4. WHAT THIS PROJECT IS
+
+SportMeet is intended to be a sports venue and event marketplace.
+
+Main idea:
+Users discover sports venues, view available courts, book time slots, join events, pay online, leave reviews, and manage their profile.
+
+Venue owners can:
+Register as venue owners, create/manage venues, manage courts, see venue bookings, create events, and track their own activity.
+
+Admins can:
+Manage users, venue owners, venues, sports, amenities, bookings, events, payments, reviews, discounts, branding, static content, and social login keys.
+
+The discontinued project already has a strong foundation. It is not a simple landing page; it is closer to a marketplace/admin SaaS product with three roles:
+1. Public/player user
+2. Venue owner
+3. Platform admin
+
+5. DEMO DATA ADDED
+
+I added a new idempotent seed script for demo/showcase data:
+D:\sportsmeet\sportmeet-main\backend\seed_demo_data.py
+
+Current public demo data includes:
+- 5 users
+- 10 approved venues with local media images
+- 34 courts total
+- 10 published events with images
+- 4 new demo bookings plus earlier seeded bookings
+- 3 completed demo payments
+- 4 approved venue reviews
+- 16 sports categories
+- Amenities master data
+- Court types
+- Homepage slider images
+- Site settings and static page content
+- One demo discount code: WELCOME10
+- One generated demo report
+
+Approved demo venues:
+1. Melbourne Sports Complex
+2. Sydney Athletic Centre
+3. Brisbane Racquet Hub
+4. Perth Aquatic & Fitness Arena
+5. Adelaide Community Courts
+6. Canberra Training Dome
+7. Hobart Racquet & Squash Club
+8. Gold Coast Beach Sports Park
+9. Newcastle Hockey & Field Centre
+10. Darwin Indoor Sports Hall
+
+Published demo events:
+1. Friday Night Tennis Ladder
+2. 3x3 Basketball Community Cup
+3. Weekend Cricket Skills Clinic
+4. Mixed Netball Social Night
+5. Beginner Boxing Bootcamp
+6. Squash Round Robin
+7. Beach Volleyball Pairs Cup
+8. Junior Hockey Skills Day
+9. Friday Futsal League Trial
+10. Athlete Recovery Yoga
+
+Images:
+The seed script tries Unsplash keyword URLs first, then uses Picsum fallback images if Unsplash is unavailable. These are demo-only public photos stored under:
+D:\sportsmeet\sportmeet-main\backend\media
+
+6. VERIFIED WORKING LOCALLY
+
+Backend health:
+GET /api/core/health/ returns 200.
+
+Public stats:
+GET /api/core/stats/ returns users, venues, bookings, and events.
+
+Public venue list:
+GET /api/venues/ returns 4 approved venues with images.
+
+Public event list:
+GET /api/events/ returns 3 published events with images.
+
+Admin login API:
+POST /api/auth/login/ works with admin@sportmeet.com / admin123.
+
+Admin dashboard stats API:
+GET /api/core/admin/dashboard-stats/ works with admin token.
+
+Frontend:
+React dev server compiles and serves at http://127.0.0.1:5000/.
+
+Django admin:
+Available at http://127.0.0.1:8000/admin/.
+
+7. FEATURE INVENTORY
+
+Authentication:
+- Email/password login
+- Registration
+- Token authentication
+- Profile endpoint
+- Change password endpoint
+- Role support through user_type
+- Admin-only route support in frontend
+- Social login endpoints exist for Facebook and Google
+
+Public frontend:
+- Home page with dynamic slider and site settings
+- Venue discovery page
+- Venue booking/detail page
+- Public events page
+- Event detail page
+- Sports page
+- Login/register pages
+- Venue owner registration
+- Venue registration
+- Static pages: FAQ, terms, privacy, cookies, support
+
+Venue system:
+- Venue model with owner, address, location, sports, amenities, status, verification, rating, gallery
+- Court model with sport, type, pricing, capacity, surface, availability, images
+- Availability model
+- Dynamic pricing model
+- Venue search and nearby endpoints
+- Admin venue listing
+- Venue owner "my venues" endpoint
+- Sports and amenities master endpoints
+
+Booking system:
+- Booking model supports multi-court bookings
+- BookingCourt child model
+- Time slot model
+- Booking cancellation model
+- Booking review model
+- User bookings endpoint
+- Admin bookings endpoint
+- Venue-owner bookings endpoint
+- Guest multi-court booking endpoint
+- Booked slot lookup endpoint
+- Booking status update endpoint
+
+Events:
+- Event model with location fields, sport, type, date/time, registration, fees, visibility, images
+- Event participant model
+- Event comments
+- Public event listing
+- Admin event listing
+- User event listing
+- Event registration/unregistration
+- Event booking/participant admin list
+
+Payments:
+- Payment and refund models
+- Stripe PaymentIntent creation endpoint
+- Stripe payment confirmation endpoint
+- Webhook endpoint
+- Admin payment list and stats
+- Saved payment methods endpoint placeholder
+
+Reviews:
+- Venue reviews
+- Admin review list
+- Review creation endpoint
+- Venue review endpoint
+- Rating aggregation into venue.average_rating and venue.total_reviews
+
+Discounts:
+- Discount/coupon model
+- Discount usage tracking
+- Validate discount endpoint
+- Apply discount endpoint
+- Discount stats endpoint
+- User discounts endpoint
+
+Reports/analytics:
+- Report model
+- Dashboard stats endpoint
+- Venue analytics endpoint
+- Booking analytics endpoint
+- Revenue report endpoint
+- User activity report endpoint
+- Generate report endpoint
+
+Core/admin settings:
+- Site settings model
+- Branding image fields
+- Dynamic static page content fields
+- Homepage slider images
+- Social media key storage
+- Admin dashboard stats
+- Recent activity endpoint
+- Top venues endpoint
+
+8. KNOWN ISSUES / PENDING INTEGRATION
+
+Database:
+- Original project was configured for PostgreSQL, not MySQL.
+- I added SQLite support for local development.
+- masterdata.sql is a PostgreSQL dump and cannot be imported directly into SQLite.
+- If we want production-quality continuation, PostgreSQL is the easiest path because the dump and original settings are PostgreSQL-oriented.
+- MySQL can be added later, but migrations and JSON/date behavior should be tested carefully.
+
+Python compatibility:
+- The machine has Python 3.14.
+- Old pins for Pillow, psycopg2-binary, and django-filter needed loosening so dependencies install and run on Python 3.14.
+
+Migrations:
+- Several old discount/account migrations contained PostgreSQL-only SQL such as DO $$ and ADD COLUMN IF NOT EXISTS.
+- I converted them to SQLite-safe no-op/Python migrations for local use.
+- Before production deployment, review these migrations against the real production DB history.
+
+Old sample script:
+- backend/add_sample_data.py is partly stale.
+- It creates users/venues/courts but breaks on events because it refers to an old Event.venue field that no longer exists.
+- Use backend/seed_demo_data.py for demo data instead.
+
+Frontend warnings:
+- The React app compiles, but there are many lint warnings for unused imports/variables.
+- BookingDetailPage has a no-mixed-operators warning around a conditional expression.
+- These are not blocking local demo startup, but should be cleaned before serious development.
+
+Admin stats:
+- Admin dashboard venue stats appear to count "active" venues, but Venue.status uses approved/pending/rejected/suspended.
+- This can show active: 0 even when approved venues exist.
+- Fix by mapping active to approved or renaming the stat.
+
+Venue price filtering:
+- Some venue filters/order fields reference base_price_per_hour, but the Venue model no longer has that field.
+- Pricing now appears to live on Court.price_per_duration and VenuePricing.
+- Fix venue price filter to aggregate from courts.
+
+Payments:
+- Stripe code exists but needs real/test Stripe keys.
+- Current local data includes demo payment records only.
+- PaymentIntent and confirm flows need full browser checkout testing with Stripe test keys.
+
+Social login:
+- Facebook and Google endpoints/pages exist.
+- Needs valid OAuth app IDs/secrets and redirect URL configuration.
+- Admin social keys page exists but needs end-to-end verification.
+
+Maps/location:
+- Mapbox dependency exists.
+- REACT_APP_MAPBOX_TOKEN is still placeholder.
+- Nearby search is simple math in SQL; production should use proper geospatial support if location is important.
+
+Email:
+- SMTP settings are placeholders.
+- Password reset, booking confirmations, venue notifications, and event reminders are not fully productized.
+
+Redis/Celery:
+- Packages and settings exist.
+- No local Redis server was started.
+- Background jobs/reminders/report generation should be reviewed and either completed or removed until needed.
+
+Static/media:
+- Django warns that backend/static does not exist.
+- Media works locally through Django DEBUG serving.
+- Production needs proper static/media storage.
+
+Invoices:
+- There is an apps/invoices folder/model references in the repo, but it is not included in INSTALLED_APPS or main URLs.
+- Treat invoices as pending/unintegrated.
+
+Reports:
+- Report endpoints and models exist, but need validation against real product requirements.
+- Analytics are basic and should be aligned with admin dashboard needs.
+
+Authorization:
+- Admin and owner routes exist, but permissions should be audited endpoint by endpoint.
+- Some endpoints use IsAuthenticated but then filter manually; we should harden object-level permissions.
+
+Tests:
+- There are a few backend test scripts, but no reliable full test suite was run.
+- Add API tests for auth, booking conflict rules, venue CRUD permissions, event registration, payment confirmation, and discounts.
+
+Security:
+- SECRET_KEY and demo credentials are local/demo only.
+- DEBUG=True locally.
+- CORS is open in debug mode.
+- Production needs environment-only secrets, locked CORS, secure cookies/headers, HTTPS, logging, backups, and rate limiting.
+
+9. BEST NEXT DEVELOPMENT PLAN
+
+Phase 1: Stabilize the local baseline
+- Keep SQLite for quick local work, but decide production DB: recommended PostgreSQL.
+- Clean frontend warnings that hide real issues.
+- Fix Admin stats active/approved mismatch.
+- Fix venue price filtering to use Court pricing.
+- Replace stale add_sample_data.py with seed_demo_data.py or update it.
+- Add backend/static folder or remove STATICFILES_DIRS warning.
+
+Phase 2: Make core marketplace flows reliable
+- Public venue discovery: search, filters, sport/city, price, rating.
+- Venue detail/booking: clear court selection, slot availability, conflict prevention.
+- User bookings: create, view, cancel, review.
+- Venue owner: create venue, manage courts, manage bookings.
+- Admin: approve/reject venues, manage users, manage master data.
+
+Phase 3: Payments and commercial flows
+- Add Stripe test keys.
+- Verify PaymentIntent creation from booking checkout.
+- Verify confirm payment updates booking/payment correctly.
+- Add refund workflow and cancellation fee logic.
+- Add receipt/invoice module or remove invoice references.
+
+Phase 4: Events
+- Verify event creation/editing with images.
+- Verify registration/unregistration.
+- Connect paid event registration to Stripe.
+- Add participant management for organizer/admin.
+- Add event capacity and deadline edge-case tests.
+
+Phase 5: Trust and growth features
+- Reviews and ratings moderation.
+- Venue verification flow.
+- Better homepage content and SEO.
+- Email notifications.
+- Social login.
+- Map/location improvements.
+- Coupon/discount polish.
+
+Phase 6: Production readiness
+- PostgreSQL database.
+- Environment-based settings.
+- Proper static/media storage.
+- CI build/test pipeline.
+- API documentation.
+- Monitoring/logging.
+- Backup/restore.
+- Deployment scripts.
+
+10. COMMANDS ALREADY USED / STATUS
+
+Backend dependencies installed in:
+D:\sportsmeet\sportmeet-main\backend\venv
+
+Frontend dependencies installed in:
+D:\sportsmeet\sportmeet-main\node_modules
+
+SQLite migrations completed.
+
+Demo seed completed:
+venv\Scripts\python.exe seed_demo_data.py
+
+Current verified local status:
+- Backend running on 127.0.0.1:8000
+- Frontend running on 127.0.0.1:5000
+- API health returns 200
+- Public venue API returns 4 approved venues
+- Public event API returns 3 published events
+- Admin login API works
+
+11. IMPORTANT FILES CHANGED / ADDED
+
+Added:
+D:\sportsmeet\sportmeet-main\.env.local
+D:\sportsmeet\sportmeet-main\backend\run-local-backend.ps1
+D:\sportsmeet\sportmeet-main\backend\seed_demo_data.py
+D:\sportsmeet\sportmeet-main\SPORTMEET_PROJECT_HANDOVER.txt
+
+Changed:
+D:\sportsmeet\sportmeet-main\backend\.env
+D:\sportsmeet\sportmeet-main\backend\requirements.txt
+D:\sportsmeet\sportmeet-main\backend\sportmeet\settings.py
+D:\sportsmeet\sportmeet-main\backend\apps\accounts\migrations\0008_backfill_venue_owner_user_type.py
+D:\sportsmeet\sportmeet-main\backend\apps\discounts\migrations\0003_sync_discount_columns_if_missing.py
+D:\sportsmeet\sportmeet-main\backend\apps\discounts\migrations\0004_fix_legacy_used_count_default.py
+D:\sportsmeet\sportmeet-main\backend\apps\discounts\migrations\0005_allow_null_valid_dates.py
+D:\sportsmeet\sportmeet-main\backend\apps\discounts\migrations\0006_set_is_active_default_true.py
+
+12. CONTINUATION SUMMARY
+
+This project is worth continuing. The discontinued codebase already contains the main domain pieces for a sports booking marketplace:
+users, venue owners, venues, courts, bookings, events, payments, reviews, discounts, reporting, and admin settings.
+
+The strongest path is:
+1. Stabilize local/dev setup.
+2. Fix mismatched old fields and stale scripts.
+3. Complete booking and payment flows.
+4. Harden admin and venue-owner permissions.
+5. Add tests.
+6. Move production DB to PostgreSQL unless there is a strong reason to use MySQL.
+
+The immediate demo is now usable with seeded data and local images, so we can review the actual UI and prioritize missing functionality screen by screen.

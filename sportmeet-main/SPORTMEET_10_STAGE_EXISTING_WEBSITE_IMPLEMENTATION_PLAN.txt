@@ -1,0 +1,1629 @@
+SPORTMEET - 10 STAGE IMPLEMENTATION PLAN FOR EXISTING WEBSITE
+Generated locally: 2026-05-27
+
+Source documents used:
+- C:\Users\UMS\Downloads\SPORTMEET_A_TO_Z_REALTIME_IMPLEMENTATION_PLAN.txt
+- D:\sportsmeet\sportmeet-main\SPORTMEET_PROJECT_HANDOVER.txt
+- D:\sportsmeet\sportmeet-main\SPORTMEET_UI_UX_STRUCTURE.txt
+
+======================================================================
+1. DOCUMENT PURPOSE
+======================================================================
+
+This document converts the existing A-Z realtime implementation roadmap into a practical 10-stage plan for the current SportMeet codebase.
+
+Goal:
+Continue the discontinued SportMeet project and implement all required marketplace, booking, event, dashboard, payment, notification, admin, UI/UX, demo-data, security, testing, and deployment improvements into the existing website.
+
+This plan is written so the team can understand:
+- What SportMeet currently is.
+- What is already working locally.
+- What needs to be improved.
+- Which files/modules are involved.
+- How to implement the improvements in stages.
+- What to verify before moving to the next stage.
+
+Core product promise:
+"Discover, Book & Play."
+
+Target product:
+A complete sports venue and event booking marketplace where:
+- Public users can discover venues, sports, and events.
+- Players can book courts, pay online, join events, review venues, and manage activity.
+- Venue owners can list venues, add courts/pricing/availability/photos, manage bookings, and track revenue.
+- Admins can manage the full business from a dashboard.
+
+======================================================================
+2. CURRENT LOCAL PROJECT STATUS
+======================================================================
+
+Project path:
+D:\sportsmeet\sportmeet-main
+
+Frontend:
+- React 18
+- Create React App
+- React Router
+- React Query
+- Axios
+- Tailwind CSS
+- Lucide React icons
+- Mapbox GL dependency
+- Stripe React dependency
+
+Backend:
+- Django
+- Django REST Framework
+- Token authentication
+- django-allauth / OAuth-related structure
+- Stripe integration code
+- Celery/Redis packages
+- SQLite enabled locally
+- PostgreSQL originally intended
+
+Local frontend:
+http://127.0.0.1:5000/
+
+Local backend API:
+http://127.0.0.1:8000/api/
+
+Local Django backend admin:
+http://127.0.0.1:8000/admin/
+
+Local database:
+D:\sportsmeet\sportmeet-main\backend\db.sqlite3
+
+Important environment files:
+D:\sportsmeet\sportmeet-main\.env.local
+D:\sportsmeet\sportmeet-main\backend\.env
+
+Current local API setting:
+REACT_APP_API_URL=http://127.0.0.1:8000/api
+
+Current local DB settings:
+DB_ENGINE=sqlite
+SQLITE_DB_PATH=db.sqlite3
+DJANGO_DEBUG=True
+
+Run backend:
+cd D:\sportsmeet\sportmeet-main\backend
+venv\Scripts\python.exe manage.py runserver 127.0.0.1:8000
+
+Run frontend:
+cd D:\sportsmeet\sportmeet-main
+npm.cmd start
+
+Demo seed script:
+D:\sportsmeet\sportmeet-main\backend\seed_demo_data.py
+
+Seed command:
+cd D:\sportsmeet\sportmeet-main\backend
+venv\Scripts\python.exe seed_demo_data.py
+
+======================================================================
+3. LOCAL LINKS AND LOGIN CREDENTIALS
+======================================================================
+
+Frontend app:
+http://127.0.0.1:5000/
+
+Login page:
+http://127.0.0.1:5000/login
+
+Admin dashboard:
+http://127.0.0.1:5000/admin
+
+Django backend admin:
+http://127.0.0.1:8000/admin/
+
+Backend API base:
+http://127.0.0.1:8000/api/
+
+Backend health check:
+http://127.0.0.1:8000/api/core/health/
+
+Public pages:
+http://127.0.0.1:5000/venues
+http://127.0.0.1:5000/events
+http://127.0.0.1:5000/sports
+http://127.0.0.1:5000/register
+http://127.0.0.1:5000/register-venue-owner
+http://127.0.0.1:5000/register-venue
+
+User / venue owner pages:
+http://127.0.0.1:5000/dashboard
+http://127.0.0.1:5000/profile
+http://127.0.0.1:5000/bookings
+http://127.0.0.1:5000/venues/manage
+http://127.0.0.1:5000/bookings/venue
+
+Admin pages:
+http://127.0.0.1:5000/admin
+http://127.0.0.1:5000/admin/analytics
+http://127.0.0.1:5000/admin/users
+http://127.0.0.1:5000/admin/users/venue-owners
+http://127.0.0.1:5000/admin/venues
+http://127.0.0.1:5000/admin/venues/create
+http://127.0.0.1:5000/admin/venues/sports
+http://127.0.0.1:5000/admin/venues/amenities
+http://127.0.0.1:5000/admin/bookings
+http://127.0.0.1:5000/admin/events
+http://127.0.0.1:5000/admin/events/create
+http://127.0.0.1:5000/admin/events/bookings
+http://127.0.0.1:5000/admin/payments
+http://127.0.0.1:5000/admin/reviews
+http://127.0.0.1:5000/admin/activity-log
+http://127.0.0.1:5000/admin/discounts
+http://127.0.0.1:5000/admin/settings
+http://127.0.0.1:5000/admin/social-keys
+
+Demo credentials:
+
+Admin:
+Email: admin@sportmeet.com
+Password: admin123
+Role: admin / superuser
+
+Venue owner:
+Email: owner@sportmeet.com
+Password: owner123
+Role: venue_owner
+
+Player:
+Email: player@sportmeet.com
+Password: player123
+Role: player
+
+Extra demo players:
+Email: sam.player@sportmeet.com
+Password: player123
+
+Email: mia.player@sportmeet.com
+Password: player123
+
+Important note:
+If PowerShell requests a frontend React route directly, it may show "Cannot GET /admin" because it does not send browser-like HTML headers. The route works in a normal browser.
+
+======================================================================
+4. CURRENT FEATURE INVENTORY
+======================================================================
+
+Authentication:
+- Email/password login.
+- Registration.
+- Token authentication.
+- Profile endpoint.
+- Change password endpoint.
+- Role support through user_type.
+- Admin-only route support in frontend.
+- Facebook and Google social login structure exists but needs OAuth keys and testing.
+
+Public frontend:
+- Homepage.
+- Venue discovery page.
+- Venue detail / booking page.
+- Public events page.
+- Event detail page.
+- Sports page.
+- Login/register pages.
+- Venue owner registration.
+- Venue registration.
+- Static pages: FAQ, terms, privacy, cookies, support.
+
+Venue system:
+- Venue model with owner, address, location, sports, amenities, status, verification, rating, and gallery.
+- Court model with sport, type, pricing, capacity, surface, availability, and images.
+- Availability model.
+- Dynamic pricing model.
+- Venue search and nearby endpoints.
+- Admin venue listing.
+- Venue owner "my venues" endpoint.
+- Sports and amenities master endpoints.
+
+Booking system:
+- Booking model supports multi-court bookings.
+- BookingCourt child model.
+- Time slot model.
+- Booking cancellation model.
+- Booking review model.
+- User bookings endpoint.
+- Admin bookings endpoint.
+- Venue owner bookings endpoint.
+- Guest multi-court booking endpoint.
+- Booked slot lookup endpoint.
+- Booking status update endpoint.
+
+Events:
+- Event model with location fields, sport, event type, date/time, registration, fees, visibility, and images.
+- Event participant model.
+- Event comments.
+- Public event listing.
+- Admin event listing.
+- User event listing.
+- Event registration and unregistration.
+- Event booking / participant admin list.
+
+Payments:
+- Payment and refund models.
+- Stripe PaymentIntent creation endpoint.
+- Stripe payment confirmation endpoint.
+- Stripe webhook endpoint.
+- Admin payment list and stats.
+- Saved payment methods endpoint placeholder.
+
+Reviews:
+- Venue reviews.
+- Admin review list.
+- Review creation endpoint.
+- Venue review endpoint.
+- Rating aggregation into venue.average_rating and venue.total_reviews.
+
+Discounts:
+- Discount / coupon model.
+- Discount usage tracking.
+- Validate discount endpoint.
+- Apply discount endpoint.
+- Discount stats endpoint.
+- User discounts endpoint.
+
+Reports / analytics:
+- Report model.
+- Dashboard stats endpoint.
+- Venue analytics endpoint.
+- Booking analytics endpoint.
+- Revenue report endpoint.
+- User activity report endpoint.
+- Generate report endpoint.
+
+Core / admin settings:
+- Site settings model.
+- Branding image fields.
+- Dynamic static page content fields.
+- Homepage slider images.
+- Social media key storage.
+- Admin dashboard stats.
+- Recent activity endpoint.
+- Top venues endpoint.
+
+Demo data currently available:
+- 5 users.
+- 10 approved venues.
+- 34 courts.
+- 10 published events.
+- 16 sports categories.
+- Bookings, payments, reviews, discount, report, site settings, and slider content.
+
+======================================================================
+5. KNOWN ISSUES AND PENDING INTEGRATION
+======================================================================
+
+Database:
+- Local development now uses SQLite.
+- Original project was PostgreSQL-oriented.
+- masterdata.sql is a PostgreSQL dump and cannot be imported directly into SQLite.
+- PostgreSQL is recommended for production continuation.
+- MySQL can be added later if required, but migrations, JSON fields, date behavior, and search/filter logic must be retested carefully.
+
+Images and media:
+- Local media now works because DJANGO_DEBUG=True is set.
+- Production needs proper static/media hosting.
+- Sports categories should eventually use unique realistic sport images instead of one repeated fallback.
+
+Single pages:
+- Venue and event detail routes have been verified locally.
+- Event detail was fixed to use cover_image_url.
+- More end-to-end browser testing is still needed after UI changes.
+
+Frontend warnings:
+- Build succeeds, but there are many lint warnings.
+- Warnings include unused imports/variables, hook dependency warnings, alt text warnings, and one mixed-operator warning in BookingDetailPage.
+
+Admin stats:
+- Some admin stats use old wording such as active venues.
+- Venue.status uses approved/pending/rejected/suspended.
+- The dashboard should show approved venues instead of active venues, or clearly map active to approved.
+
+Venue pricing:
+- Venue base_price_per_hour is stale.
+- Pricing should come from Court.price_per_duration and/or VenuePricing.
+- Venue listing filters and sorting should use aggregated court pricing.
+
+Payments:
+- Stripe code exists but needs test/live keys.
+- PaymentIntent, payment confirmation, webhooks, failed payments, refunds, and receipts need full testing.
+
+Social login:
+- Facebook and Google endpoints/pages exist.
+- Valid OAuth app IDs/secrets and redirect URLs are required.
+
+Maps/location:
+- Mapbox dependency exists.
+- REACT_APP_MAPBOX_TOKEN is not configured.
+- All map UI must degrade gracefully without a token.
+- Production nearby search should use PostgreSQL/PostGIS if location becomes a core feature.
+
+Email/notifications:
+- SMTP placeholders exist.
+- Booking confirmations, password reset, owner notifications, event reminders, and admin alerts need implementation.
+
+Redis/Celery:
+- Packages exist.
+- Redis server and Celery worker/beat are not fully wired for local operation.
+- Background jobs should be completed for reminders, email queues, reports, and expiry tasks.
+
+Invoices:
+- apps/invoices exists or is referenced, but is not fully integrated into INSTALLED_APPS/main URLs.
+- Invoice/receipt work should be treated as pending.
+
+Reports:
+- Report endpoints exist but numbers need validation against business requirements.
+
+Authorization:
+- Permissions must be audited endpoint by endpoint.
+- Players should only access own data.
+- Venue owners should only access own venues/bookings.
+- Admin endpoints should be admin-only.
+
+======================================================================
+6. 10 STAGE IMPLEMENTATION ROADMAP
+======================================================================
+
+The stages below are ordered so the project becomes stable first, then visually polished, then commercially complete, then production-ready.
+
+----------------------------------------------------------------------
+STAGE 1: PROJECT STABILIZATION AND BASELINE CLEANUP
+----------------------------------------------------------------------
+
+Priority:
+Critical
+
+Purpose:
+Create a clean, stable foundation before adding more features.
+
+Main areas:
+- Local setup.
+- Database configuration.
+- Environment files.
+- Seed data.
+- Warnings cleanup.
+- Broken/stale references.
+
+Implementation tasks:
+1. Confirm current baseline of the project and keep all new changes scoped.
+2. Keep SQLite for local development.
+3. Decide production database direction. Recommended: PostgreSQL.
+4. Keep seed_demo_data.py as the official demo seed script.
+5. Mark backend/add_sample_data.py as stale or update it to the current models.
+6. Create or update backend/.env.example.
+7. Create or update frontend .env.example.
+8. Add backend/static or remove the invalid STATICFILES_DIRS warning.
+9. Clean React lint warnings page by page.
+10. Fix BookingDetailPage mixed-operator warning.
+11. Remove unused imports and variables.
+12. Fix old field references, especially base_price_per_hour.
+13. Fix admin stat labels from active venues to approved venues.
+14. Confirm venue price filters use court pricing.
+15. Confirm public API only returns approved venues and published events.
+16. Confirm detail pages load directly in the browser.
+17. Confirm all local demo credentials work.
+
+Important current files:
+- backend/sportmeet/settings.py
+- backend/.env
+- .env.local
+- backend/requirements.txt
+- backend/seed_demo_data.py
+- src/App.js
+- src/components/Layout/Header.js
+- src/components/Layout/FloatingMenu.js
+- src/pages/BookingDetailPage.js
+- src/pages/Admin/AdminDashboard.js
+- src/pages/VenueDiscoveryPage.js
+
+Backend checks:
+- GET /api/core/health/
+- GET /api/core/stats/
+- GET /api/venues/
+- GET /api/events/
+- POST /api/auth/login/
+
+Acceptance criteria:
+- Backend starts without errors.
+- Frontend starts locally.
+- npm.cmd run build succeeds.
+- Demo data loads.
+- Images load from /media/.
+- Admin/player/owner logins work.
+- Public venues/events/sports pages show data.
+- No route shows blank content because data is missing.
+
+----------------------------------------------------------------------
+STAGE 2: GLOBAL UI/UX SYSTEM, NAVIGATION, AND RESPONSIVE FOUNDATION
+----------------------------------------------------------------------
+
+Priority:
+Critical
+
+Purpose:
+Make the existing website feel consistent, modern, and easy to use before deeper feature work.
+
+Main areas:
+- Header/nav cleanup.
+- Layout consistency.
+- Shared components.
+- Mobile responsiveness.
+- Loading, empty, and error states.
+
+Global design direction:
+- Clean, sporty, premium, and trustworthy.
+- Public pages should feel like a modern sports marketplace.
+- Admin and owner dashboards should feel operational, dense, and easy to scan.
+- Use strong realistic sports imagery.
+- Avoid blank sections and raw error messages.
+
+Navigation improvements:
+1. Remove duplicated or overcrowded header behavior.
+2. Keep one clean sticky public header.
+3. Public nav should show:
+   Home, Venues, Events, Sports, Become a Venue Owner.
+4. Logged-in player nav should show:
+   Dashboard, Bookings, Profile, Logout.
+5. Venue owner nav should show:
+   Owner Dashboard, My Venues, Venue Bookings.
+6. Admin should use a separate dashboard sidebar layout.
+7. Add user avatar/account menu after login.
+8. Make mobile menu simple and tap-friendly.
+
+Shared UI components to standardize:
+- Buttons: primary, secondary, ghost, danger, success.
+- Cards.
+- Form inputs.
+- Select/dropdowns.
+- Date/time inputs.
+- Badges/status chips.
+- Tables.
+- Modals/drawers.
+- Loading skeletons.
+- Empty states.
+- Error states.
+- Pagination/load more controls.
+- Toast notifications.
+
+Recommended color direction:
+- Primary: deep navy or sports blue.
+- Secondary/accent: energetic green or orange.
+- Background: soft gray/off-white.
+- Success: green.
+- Warning: amber.
+- Error: red.
+- Info: blue.
+
+Mobile requirements:
+- No horizontal scrolling.
+- Filter panels should become drawers.
+- Booking CTA should become sticky bottom action on booking pages.
+- Tables should become stacked cards where needed.
+- Slot buttons should be large enough to tap.
+
+Important files:
+- src/components/Layout/Layout.js
+- src/components/Layout/Header.js
+- src/components/Layout/FloatingMenu.js
+- src/components/Admin/AdminLayout.js
+- src/components/ProtectedRoute.js
+- src/index.css
+- tailwind.config.js
+
+Acceptance criteria:
+- Header is no longer duplicated/overloaded.
+- Public, owner, and admin experiences feel separate and clear.
+- Buttons/cards/forms/statuses look consistent.
+- Every loading/empty/error state has useful fallback content.
+- Mobile homepage, listings, detail pages, login, and dashboards are usable.
+
+----------------------------------------------------------------------
+STAGE 3: HOMEPAGE, SPORTS CATEGORIES, AND DEMO CONTENT COMPLETION
+----------------------------------------------------------------------
+
+Priority:
+High
+
+Purpose:
+Make the homepage conversion-focused and ensure the website never looks empty.
+
+Current homepage sections:
+- Header/navigation.
+- Hero.
+- Location search.
+- Hero image/slider.
+- Book Venues.
+- Upcoming Events.
+- Select Sport.
+- Who We Are.
+- Footer.
+
+Homepage improvements:
+1. Redesign hero to clearly communicate:
+   "Book Sports Venues & Join Events Near You"
+2. Keep supporting copy close to:
+   "Find courts, events, and local sports communities in minutes."
+3. Add main search with:
+   City/area, sport, date.
+4. Search should redirect to /venues with query params.
+   Example:
+   /venues?city=Melbourne&sport=tennis&date=2026-05-27
+5. Add primary CTA:
+   Find Venues.
+6. Add secondary CTA:
+   Explore Events.
+7. Add sport shortcut chips:
+   Badminton, Football, Tennis, Cricket, Basketball.
+8. Add trust stats:
+   Venues listed, bookings completed, events hosted, active sports.
+9. Featured venues should show 6-8 approved venues.
+10. Venue cards should show:
+   Image, rating, city, sport tags, starting price, court count, Book Now CTA.
+11. Upcoming events should show 4-6 events.
+12. Event cards should show:
+   Date, sport, city, price/free, capacity/spots left, Register CTA.
+13. Sports categories should show:
+   Unique sport images, sport name, venue count, Find Venues CTA.
+14. Add venue owner CTA:
+   "Own a sports venue? Start receiving bookings online."
+15. Footer should include:
+   About, Support, Terms, Privacy, Contact, Social links, Venue owner link.
+
+Sports page improvements:
+1. Add unique realistic images per sport.
+2. Add venue counts from API.
+3. Add popular/trending badges.
+4. Add search/filter by sport name.
+5. Link each sport to /venues?sport_category=<sport>.
+6. Later add sport detail landing pages.
+
+Demo content requirements:
+- Homepage should always show fallback/demo venues if API fails.
+- Events page should always show fallback/demo events if API fails.
+- Sports page should always show fallback/demo sports if API fails.
+- User dashboard should show recommended venues if user has no bookings.
+- Venue owner dashboard should show onboarding checklist if no venues exist.
+- Admin should show setup/seed data checklist if no data exists.
+
+Backend/API support needed:
+- /api/core/stats/ or homepage summary endpoint for dynamic stats.
+- Sports API should return venue_count.
+- Venue API should return min_price, court_count, review_count.
+- Events API should return spots_left/capacity.
+
+Important files:
+- src/pages/HomePage.js
+- src/pages/SportsPage.js
+- src/context/SiteContext.js
+- backend/apps/core/views.py
+- backend/apps/venues/views.py
+- backend/apps/venues/serializers.py
+- backend/apps/events/views.py
+- backend/apps/events/serializers.py
+- backend/seed_demo_data.py
+
+Acceptance criteria:
+- Homepage explains the product within five seconds.
+- Homepage does not show "Unable to load" as primary content.
+- Book Venues, Upcoming Events, and Select Sport all show useful cards.
+- Search connects to venue listing.
+- Sports page has realistic imagery and no broken icons.
+
+----------------------------------------------------------------------
+STAGE 4: VENUE DISCOVERY, FILTERING, DETAIL PAGE, AND BOOKING UX
+----------------------------------------------------------------------
+
+Priority:
+Critical
+
+Purpose:
+Complete the main revenue path from discovery to court selection and booking.
+
+Venue listing route:
+/venues
+
+Venue detail route:
+/venues/:id
+
+Venue discovery improvements:
+1. Add page title:
+   Discover Sports Venues.
+2. Add search by:
+   City, area, venue name.
+3. Add sport chips.
+4. Add filter sidebar/drawer.
+5. Add sort dropdown.
+6. Add grid/list toggle.
+7. Add optional map/list split only after Mapbox token is configured.
+
+Required venue filters:
+- Sport.
+- City/area.
+- Date.
+- Time.
+- Price range.
+- Rating.
+- Indoor/outdoor.
+- Court type.
+- Amenities.
+- Open today.
+- Nearby radius.
+- Featured/verified venues.
+
+Venue card should show:
+- Venue image.
+- Venue name.
+- Verified badge if verified.
+- City/state.
+- Distance if location is allowed.
+- Rating and review count.
+- Sports available.
+- Court count.
+- Starting price from court pricing.
+- Open/closed status if availability supports it.
+- Main amenities.
+- Book Now CTA.
+- View Details CTA.
+
+Venue listing backend requirements:
+1. Standardize search/filter/sort parameters.
+2. Add min_price from related courts.
+3. Add max_price if useful.
+4. Add court_count.
+5. Add review_count.
+6. Add available_today if supported.
+7. Add pagination.
+8. Add sorting:
+   rating, price_low, price_high, newest, nearest.
+9. Keep SQLite and PostgreSQL behavior compatible.
+10. Avoid JSON contains lookups that break SQLite.
+
+Venue detail page structure:
+1. Breadcrumbs:
+   Home > Venues > Venue Name.
+2. Large gallery:
+   Main image + thumbnails + fallback.
+3. Venue information:
+   Name, verified/status badge, rating, address, phone/email if allowed, sport tags, amenities, description, policies.
+4. Map/location area:
+   Show map only with token, otherwise static address card.
+5. Reviews section.
+6. Related venues.
+7. Sticky booking widget on desktop.
+
+Booking widget should use 3 steps:
+
+Step 1: Select sport and court.
+- Sport dropdown/cards.
+- Court cards with image, court name, type, indoor/outdoor, capacity, surface, price.
+
+Step 2: Select date and time.
+- Calendar/date selector.
+- Slot grid.
+- Show available, selected, unavailable, booked states.
+- Duration selector.
+- Special requests.
+
+Step 3: Confirm details.
+- Booking summary.
+- Venue name.
+- Court name.
+- Date/time/duration.
+- Price breakdown.
+- Discount code.
+- Taxes/fees if applicable.
+- Total.
+- Login or guest choice.
+- Continue to payment button.
+
+Important UX rule:
+Do not place guest checkout inside the payment modal. Ask the user to login or continue as guest before opening payment.
+
+Important files:
+- src/pages/VenueDiscoveryPage.js
+- src/pages/VenueBookingPage.js
+- src/components/ImageSlider.js
+- backend/apps/venues/views.py
+- backend/apps/venues/serializers.py
+- backend/apps/bookings/views.py
+- backend/apps/bookings/models.py
+
+Acceptance criteria:
+- Venue filters do not crash on SQLite or PostgreSQL.
+- Empty filters show all approved venues.
+- No-results state recommends clearing filters and shows popular venues.
+- Venue detail always shows image, address, courts, availability placeholder, and contact information.
+- Booking steps are understandable on desktop and mobile.
+
+----------------------------------------------------------------------
+STAGE 5: BOOKING ENGINE, PAYMENTS, DISCOUNTS, RECEIPTS, AND NOTIFICATIONS
+----------------------------------------------------------------------
+
+Priority:
+Critical
+
+Purpose:
+Make the booking and payment flow reliable enough for real users.
+
+Booking logic requirements:
+1. Validate slot availability on backend before creating a booking.
+2. Prevent double booking using database transactions/locking.
+3. Support multi-court bookings safely.
+4. Add slot reservation expiry if booking is created before payment.
+5. Release reserved slots if payment fails or expires.
+6. Add cancellation workflow with reason.
+7. Add no-show/completed handling for venue owners/admins.
+
+Booking status lifecycle:
+- pending.
+- payment_pending.
+- confirmed.
+- cancelled.
+- completed.
+- failed.
+- refunded.
+
+Payment requirements:
+1. Add Stripe test keys locally.
+2. Complete PaymentIntent creation.
+3. Confirm payment from frontend.
+4. Verify Stripe webhook signatures.
+5. Update booking and payment records from webhook.
+6. Handle failed payments.
+7. Add retry payment option.
+8. Add refund workflow.
+9. Add receipt/invoice generation or integrate invoices module.
+10. Add payment audit logs.
+
+Payment UX:
+- If Stripe keys are missing, show demo-mode message.
+- If Stripe test keys exist, allow test-card flow.
+- Show payment success page.
+- Show payment failure page with retry action.
+- Show receipt/download option after successful payment.
+
+Discount requirements:
+1. Validate coupon date range.
+2. Validate active status.
+3. Validate user/venue/event applicability.
+4. Validate usage limits.
+5. Track usage.
+6. Prevent repeated abuse.
+7. Show discount line in booking summary.
+
+Notification requirements:
+Create notification model/API for:
+- Booking confirmation.
+- Booking cancellation.
+- Payment success/failure.
+- Event registration.
+- Venue approval/rejection.
+- Venue owner new booking alert.
+- Review received.
+- Booking reminders.
+
+Notification channels:
+- In-app notification first.
+- Email through SMTP/Celery.
+- SMS/WhatsApp later if needed.
+
+Important backend files/modules:
+- backend/apps/bookings/
+- backend/apps/payments/
+- backend/apps/discounts/
+- backend/apps/invoices/ if integrated
+- backend/apps/core/ or a new notifications app
+- backend/sportmeet/settings.py
+
+Important frontend files:
+- src/pages/VenueBookingPage.js
+- src/pages/BookingConfirmationPage.js
+- src/pages/BookingDetailPage.js
+- src/pages/BookingsPage.js
+- src/services/api.js
+
+Acceptance criteria:
+- User can select court/date/time and create a booking.
+- Backend prevents duplicate bookings.
+- Stripe test payment succeeds.
+- Failed payment does not leave a confirmed booking.
+- Cancellation/refund flow is traceable.
+- Player and owner receive notifications.
+- Booking detail shows timeline, payment, and cancellation status.
+
+----------------------------------------------------------------------
+STAGE 6: PLAYER DASHBOARD AND PROFILE EXPERIENCE
+----------------------------------------------------------------------
+
+Priority:
+High
+
+Purpose:
+Give players a complete self-service area for bookings, events, reviews, and profile.
+
+Routes:
+/dashboard
+/bookings
+/bookings/:id
+/profile
+/reviews
+
+Dashboard cards:
+- Upcoming bookings.
+- Past bookings.
+- Joined events.
+- Reviews submitted.
+- Saved/favorite venues.
+- Pending payments if any.
+
+Quick actions:
+- Book a venue.
+- Browse events.
+- Edit profile.
+- View booking history.
+
+Bookings page improvements:
+1. Add tabs:
+   Upcoming, Past, Cancelled, Failed.
+2. Add search by venue/event.
+3. Add filter by status/date.
+4. Use booking cards with status chips.
+5. Show cancel booking CTA only when allowed.
+6. Show rebook CTA.
+7. Show review CTA after completed booking.
+
+Booking detail improvements:
+- Booking status timeline.
+- Venue/court details.
+- Date/time/duration.
+- Payment details.
+- Cancellation rules.
+- Receipt/invoice download.
+- Contact venue/admin support.
+
+Profile page improvements:
+- Personal details.
+- Password change.
+- Notification preferences.
+- Saved payment methods placeholder or Stripe integration.
+- Delete/deactivate account flow if required.
+
+Review page improvements:
+- Only allow reviews after completed bookings.
+- Show pending/approved/hidden status if moderation is added.
+- Allow edit/delete rules if required.
+
+Empty states:
+- No bookings:
+  "Book your first venue" + recommended venues.
+- No reviews:
+  "Review venues after your completed bookings."
+- No events:
+  "Explore upcoming events."
+
+Important files:
+- src/pages/DashboardPage.js
+- src/pages/ProfilePage.js
+- src/pages/BookingsPage.js
+- src/pages/BookingDetailPage.js
+- src/pages/ReviewsPage.js
+- backend/apps/bookings/
+- backend/apps/reviews/
+- backend/apps/accounts/
+- backend/apps/events/
+
+Acceptance criteria:
+- Player can understand all activity in one place.
+- Booking statuses are clear.
+- Cancellation, rebook, receipt, and review actions appear only when valid.
+- Empty dashboards still guide the user toward venues/events.
+
+----------------------------------------------------------------------
+STAGE 7: VENUE OWNER DASHBOARD, VENUE ONBOARDING, COURTS, PRICING, AND OWNER OPERATIONS
+----------------------------------------------------------------------
+
+Priority:
+Critical
+
+Purpose:
+Allow venue owners to operate their business without admin help.
+
+Routes:
+/venues/manage
+/venues/create
+/venues/:id/edit
+/bookings/venue
+
+Owner dashboard cards:
+- Total bookings.
+- Upcoming bookings.
+- Monthly revenue.
+- Pending payments/refunds.
+- Venue approval status.
+- Average rating.
+- Recent reviews.
+- Pending action checklist.
+
+Venue onboarding checklist:
+1. Add venue basics.
+2. Add location.
+3. Add sports/courts.
+4. Add availability.
+5. Add pricing.
+6. Upload photos.
+7. Add policies.
+8. Submit for admin approval.
+
+Venue editor should be split into tabs/steps:
+
+Tab 1: Basics.
+- Venue name.
+- Description.
+- Owner info.
+- Contact details.
+- Status display.
+
+Tab 2: Location.
+- Address.
+- City/state/country.
+- Latitude/longitude.
+- Map preview if Mapbox is configured.
+
+Tab 3: Sports and courts.
+- Add/edit/delete courts.
+- Court images.
+- Sport.
+- Court type.
+- Capacity.
+- Surface.
+- Indoor/outdoor.
+
+Tab 4: Availability.
+- Weekly schedule.
+- Holidays/closed dates.
+- Special hours.
+- Maintenance blocks.
+
+Tab 5: Pricing.
+- Standard hourly price.
+- Peak/off-peak pricing.
+- Weekend pricing.
+- Dynamic pricing rules.
+
+Tab 6: Photos.
+- Gallery upload.
+- Main image selection.
+- Image ordering.
+
+Tab 7: Policies.
+- Cancellation policy.
+- Refund policy.
+- House rules.
+- Safety requirements.
+
+Tab 8: Preview and submit.
+- Public preview.
+- Submit for admin approval.
+
+Owner booking management:
+- View bookings by venue/date/status.
+- Accept/reject if manual approval is enabled.
+- Mark completed/no-show.
+- Cancel with reason.
+- Contact customer.
+- Export bookings.
+
+Owner notifications:
+- New booking.
+- Cancellation.
+- Payment received.
+- Venue approval/rejection.
+- Review received.
+
+Important files:
+- src/pages/VenueOwnerDashboard.js
+- src/pages/VenueOwnerVenuesPage.js
+- src/pages/VenueOwnerBookingsPage.js
+- src/pages/VenueOwnerEditVenuePage.js
+- src/pages/Admin/CreateVenuePage.js if reused
+- backend/apps/venues/
+- backend/apps/bookings/
+- backend/apps/payments/
+- backend/apps/reviews/
+
+Acceptance criteria:
+- Venue owner can create and manage a complete venue.
+- Owner can add courts, pricing, availability, and photos.
+- Owner can submit for approval and see approval status.
+- Owner can manage bookings and revenue.
+- Owner screens are clearly separate from admin screens.
+
+----------------------------------------------------------------------
+STAGE 8: EVENTS MODULE, ADMIN DASHBOARD, TRUST, SAFETY, AND MODERATION
+----------------------------------------------------------------------
+
+Priority:
+High
+
+Purpose:
+Complete the second marketplace path: events, plus the business-control/admin workflows.
+
+Event public routes:
+/events
+/events/:id
+
+Event admin routes:
+/admin/events
+/admin/events/create
+/admin/events/:id/edit
+/admin/events/bookings
+
+Events listing improvements:
+1. Search by event title/location.
+2. Filters:
+   Sport, event type, city, date range, free/paid, status.
+3. Featured events carousel.
+4. Grid/list toggle with truly different layouts.
+5. Event cards with:
+   Image, date, title, sport, city, price/free, capacity/spots left, Register CTA.
+
+Event detail improvements:
+- Large hero image.
+- Event title and status.
+- Sport/type/city tags.
+- Organizer card.
+- Date/time/location.
+- Capacity and spots left.
+- Rules, requirements, prizes.
+- Cancellation/refund rules.
+- Related events.
+- Register button.
+- Participant list preview if allowed.
+
+Event registration requirements:
+1. Enforce capacity.
+2. Enforce registration deadline.
+3. Support free event registration.
+4. Support paid event registration through Stripe.
+5. Support event cancellation/refund.
+6. Let users unregister if allowed.
+7. Let admin export participants.
+
+Admin dashboard improvements:
+1. Standardize dashboard cards:
+   Total users, venue owners, approved venues, pending venues, bookings, revenue, events, reviews.
+2. Fix active/approved venue wording.
+3. Standardize admin tables.
+4. Add consistent filters.
+5. Add pagination.
+6. Add status chips.
+7. Add row actions.
+8. Add confirmation modals for destructive actions.
+9. Add bulk actions where useful.
+10. Add audit trail.
+
+Admin workflows:
+- Manage users.
+- Manage venue owners.
+- Approve/reject/suspend venues.
+- Add rejection reason.
+- Manage sports and amenities.
+- Manage bookings.
+- Cancel/refund bookings.
+- Manage payments/refunds.
+- Manage events.
+- Manage event participants.
+- Manage reviews.
+- Moderate reported reviews.
+- Manage discounts.
+- Manage settings/static content/branding.
+- Manage social keys.
+- View activity logs.
+
+Trust and safety requirements:
+1. Venue verification workflow.
+2. Verified badge on public cards.
+3. Review only after completed bookings.
+4. Review moderation.
+5. Venue owner review response if needed.
+6. Booking policy system.
+7. Refund/cancellation policy system.
+8. No-show handling.
+9. Rate limit login, booking, coupon, and review endpoints.
+10. Validate upload file types and sizes.
+11. Add audit logging for important actions.
+
+Audit log should track:
+- User login.
+- Venue created/updated.
+- Venue approved/rejected.
+- Booking created/cancelled.
+- Payment/refund updated.
+- Admin setting changed.
+- Discount created/updated.
+
+Important files:
+- src/pages/EventsPage.js
+- src/pages/EventDetailPage.js
+- src/pages/Admin/EventsPage.js
+- src/pages/Admin/CreateEventPage.js
+- src/pages/Admin/EditEventPage.js
+- src/pages/Admin/EventBookingsPage.js
+- src/pages/Admin/AdminDashboard.js
+- src/pages/Admin/UsersPage.js
+- src/pages/Admin/VenueOwnersPage.js
+- src/pages/Admin/PaymentsPage.js
+- src/pages/Admin/ReviewsPage.js
+- src/pages/Admin/DiscountsPage.js
+- src/pages/Admin/SettingsPage.js
+- backend/apps/events/
+- backend/apps/core/
+- backend/apps/reviews/
+- backend/apps/venues/
+- backend/apps/payments/
+- backend/apps/discounts/
+
+Acceptance criteria:
+- Users can browse and register for events.
+- Paid event registration uses payment flow.
+- Admin can operate users, venues, bookings, events, payments, reviews, discounts, and settings.
+- Moderation and audit workflows exist for important business actions.
+
+----------------------------------------------------------------------
+STAGE 9: SEARCH, MAPS, SEO, CONTENT, GROWTH FEATURES, AND MOBILE POLISH
+----------------------------------------------------------------------
+
+Priority:
+Medium to High
+
+Purpose:
+Improve discovery, trust, shareability, and mobile conversion after the core flows are reliable.
+
+Search improvements:
+- Better keyword search.
+- Search by venue, area, city, sport, amenity.
+- Persist search params in URL.
+- Add clear filter chips.
+- Add clear filters button.
+- Add recommended results when no exact match.
+
+Map/location improvements:
+1. Add REACT_APP_MAPBOX_TOKEN.
+2. Add backend Mapbox token only if backend geocoding is needed.
+3. Add address autocomplete.
+4. Store latitude/longitude for venues.
+5. Show map preview on venue detail.
+6. Add map/list split view on venue listing.
+7. Add nearby venues using proper geo query.
+8. If PostgreSQL is used, consider PostGIS.
+
+Map fallback rule:
+If Mapbox token is missing, show a static address card and never show a broken map.
+
+SEO improvements:
+- Unique page titles.
+- Meta descriptions.
+- Venue detail SEO metadata.
+- Event detail SEO metadata.
+- Sports category landing pages.
+- Structured data for local business/events if needed.
+- Sitemap.
+- Robots.txt.
+- Open Graph images.
+
+Content pages:
+- FAQ.
+- Terms.
+- Privacy.
+- Cookies.
+- Support.
+- Cancellation policy.
+- Refund policy.
+- Venue owner guide.
+
+Growth features:
+- Favorite venues.
+- Recently viewed venues.
+- Referral code.
+- Discount campaigns.
+- Featured venue placements.
+- Newsletter signup.
+- Social sharing.
+
+Mobile polish:
+- Header should not feel crowded.
+- Filters should open in drawer.
+- Booking CTA should be sticky at bottom.
+- Venue gallery should be swipe-friendly.
+- Slot grid should be tappable.
+- Payment modal should fit screen.
+- Public pages should have no horizontal scroll.
+- Admin can be desktop-first but usable on tablet.
+
+Pages to test on mobile:
+- Homepage.
+- Venue listing.
+- Venue detail/booking.
+- Event listing.
+- Event detail.
+- Login/register.
+- Player dashboard.
+- Owner bookings.
+
+Important files:
+- src/pages/HomePage.js
+- src/pages/VenueDiscoveryPage.js
+- src/pages/VenueBookingPage.js
+- src/pages/EventsPage.js
+- src/pages/EventDetailPage.js
+- src/pages/SportsPage.js
+- src/pages/StaticPage.js
+- src/components/Layout/Header.js
+- backend/apps/venues/
+- backend/apps/events/
+- backend/apps/core/
+
+Acceptance criteria:
+- Search feels practical and predictable.
+- Maps work when configured and degrade gracefully when not configured.
+- Venue/event pages are shareable.
+- Mobile user can complete a booking without layout problems.
+- No important page looks blank.
+
+----------------------------------------------------------------------
+STAGE 10: TESTING, SECURITY, DATABASE MIGRATION, PRODUCTION READINESS, AND DEPLOYMENT
+----------------------------------------------------------------------
+
+Priority:
+Critical before launch
+
+Purpose:
+Prepare SportMeet for real users, real payments, and production operation.
+
+Backend tests:
+- Login success/failure.
+- Registration.
+- Role permission tests.
+- Venue search/filter/sort.
+- Venue owner venue CRUD permissions.
+- Admin venue approval.
+- Court availability.
+- Booking creation.
+- Double booking prevention.
+- Booking cancellation.
+- Discount validation.
+- PaymentIntent creation.
+- Payment confirmation.
+- Webhook handling.
+- Event registration.
+- Event capacity limit.
+- Review creation after completed booking.
+
+Frontend/manual QA:
+- Homepage loads with data.
+- Venue listing filters work.
+- Venue detail booking steps work.
+- Payment modal works in test mode.
+- Confirmation pages work.
+- Player dashboard shows bookings.
+- Venue owner dashboard shows bookings.
+- Admin pages list real data.
+- Mobile responsiveness works.
+- No broken images.
+- No blank listings.
+
+End-to-end scenarios:
+1. New player registers and books a court.
+2. Guest books a court if guest checkout is enabled.
+3. Venue owner creates venue and admin approves it.
+4. Player books approved venue.
+5. Player cancels booking and refund is processed.
+6. Player registers for free event.
+7. Player registers for paid event.
+8. Admin creates discount and user applies it.
+9. User writes review after completed booking.
+10. Venue owner receives booking notification.
+
+Security checklist:
+- Use strong SECRET_KEY from environment.
+- DEBUG=False in production.
+- Secure CORS origins.
+- HTTPS only.
+- Secure cookies.
+- CSRF protection where required.
+- Rate limit auth endpoints.
+- Rate limit booking/payment endpoints.
+- Validate file uploads.
+- Limit upload file types and sizes.
+- Do not expose admin/demo credentials in production.
+- Store secrets only in environment.
+- Do not store payment card data directly.
+- Log payment IDs, not sensitive card details.
+
+Permission checklist:
+- Player can access only own bookings/profile.
+- Venue owner can access only own venues/bookings.
+- Admin can access admin APIs.
+- Public can access only approved venues/published events.
+- Guest booking rules are clear.
+
+Production database:
+Recommended: PostgreSQL.
+
+Reason:
+- Original dump/settings are PostgreSQL-oriented.
+- Better JSON behavior.
+- Better production reliability.
+- Better future geospatial support with PostGIS.
+
+Database cleanup:
+- Review all migrations.
+- Remove or isolate SQLite-only local hacks before production if needed.
+- Ensure status values are consistent.
+- Add indexes for search-heavy fields.
+- Add indexes for booking conflict queries.
+- Add indexes for payment/refund status.
+- Add audit log table.
+- Add notification table.
+
+Recommended indexes:
+- bookings: venue_id, court_id, date, start_time, end_time, status.
+- venues: status, city, owner_id.
+- events: status, start_date, sport, city.
+- payments: status, booking_id, user_id.
+- reviews: venue_id, status.
+- notifications: user_id, is_read, created_at.
+
+Production infrastructure:
+- PostgreSQL database.
+- Redis server.
+- Celery worker.
+- Celery beat for scheduled jobs.
+- Proper static file serving.
+- Proper media storage.
+- Domain and HTTPS.
+- Environment variables.
+- Error logging.
+- Backups.
+- Monitoring.
+
+Deployment checklist:
+1. Create production .env.
+2. Set DEBUG=False.
+3. Set ALLOWED_HOSTS.
+4. Set CORS_ALLOWED_ORIGINS.
+5. Configure PostgreSQL.
+6. Run migrations.
+7. Collect static files.
+8. Configure media storage.
+9. Configure SMTP.
+10. Configure Stripe keys.
+11. Configure Stripe webhook.
+12. Configure Mapbox token.
+13. Start backend app server.
+14. Build and host frontend.
+15. Start Redis.
+16. Start Celery worker.
+17. Start Celery beat.
+18. Configure logs.
+19. Configure backups.
+20. Run smoke tests.
+
+CI/CD:
+- Run backend tests.
+- Run frontend build.
+- Run lint.
+- Deploy only after tests pass.
+
+Acceptance criteria:
+- Full user journey works on staging.
+- Payment test mode works end to end.
+- Admin can manage all major operations.
+- No secrets are committed.
+- Static/media files work.
+- Backups and logs are configured.
+- Production deployment documentation exists.
+
+======================================================================
+7. PAGE-BY-PAGE IMPLEMENTATION CHECKLIST
+======================================================================
+
+Homepage:
+[ ] Fix header duplication/overcrowding.
+[ ] Improve hero with booking-focused search.
+[ ] Add sport shortcut chips.
+[ ] Add trust stats.
+[ ] Improve venue cards.
+[ ] Improve event cards.
+[ ] Add venue owner CTA.
+[ ] Add stronger footer.
+[ ] Add fallbacks for empty API responses.
+
+Venues listing:
+[ ] Add real filter panel.
+[ ] Add sport chips.
+[ ] Add grid/list toggle with proper layouts.
+[ ] Add venue count and sort.
+[ ] Add pagination/load more.
+[ ] Add map/list only after Mapbox token.
+[ ] Add better empty state.
+
+Venue detail:
+[ ] Make gallery larger.
+[ ] Add breadcrumbs.
+[ ] Add sticky booking widget.
+[ ] Convert booking into 3-step flow.
+[ ] Improve court cards.
+[ ] Improve slot availability UI.
+[ ] Separate login/guest choice from payment.
+[ ] Add policies and reviews.
+[ ] Add related venues.
+
+Events listing:
+[ ] Make filter button functional.
+[ ] Add sport/event type/city/date/free-paid filters.
+[ ] Add capacity/spots left.
+[ ] Add Register Now CTA.
+[ ] Add real list mode layout.
+
+Event detail:
+[ ] Add larger hero image.
+[ ] Standardize participant_count.
+[ ] Add spots left.
+[ ] Add organizer card.
+[ ] Add cancellation/refund rules.
+[ ] Add related events.
+
+Sports page:
+[ ] Add unique images per sport.
+[ ] Add venue counts.
+[ ] Add popular/trending badges.
+[ ] Add search/filter by sport name.
+[ ] Add sport detail landing page later.
+
+Login/register:
+[ ] Add password visibility toggle.
+[ ] Add clear role selection.
+[ ] Add benefits panel for players vs venue owners.
+[ ] Add validation messages.
+[ ] Add post-login redirect clarity.
+[ ] Add demo credential helper only in local/demo mode.
+
+Player dashboard:
+[ ] Add stats cards.
+[ ] Add upcoming booking card.
+[ ] Add booking timeline.
+[ ] Add empty states with CTAs.
+[ ] Add favorite venues later.
+
+Venue owner dashboard:
+[ ] Create/clean owner dashboard.
+[ ] Add revenue/upcoming bookings/pending approval cards.
+[ ] Split venue editor into tabs.
+[ ] Add onboarding checklist.
+[ ] Add booking management actions.
+
+Admin dashboard:
+[ ] Fix metric labels.
+[ ] Standardize cards/tables.
+[ ] Add filters and pagination.
+[ ] Add approve/reject modals.
+[ ] Add bulk actions.
+[ ] Add audit log.
+[ ] Improve settings editor.
+
+======================================================================
+8. FINAL FEATURE COMPLETION CHECKLIST
+======================================================================
+
+Public user:
+[ ] Can browse homepage.
+[ ] Can search venues.
+[ ] Can filter venues.
+[ ] Can view venue detail.
+[ ] Can select court/date/time.
+[ ] Can book and pay.
+[ ] Can receive confirmation.
+[ ] Can view bookings.
+[ ] Can cancel if allowed.
+[ ] Can review after completed booking.
+[ ] Can browse events.
+[ ] Can register for events.
+
+Venue owner:
+[ ] Can register.
+[ ] Can create venue.
+[ ] Can add courts.
+[ ] Can add availability.
+[ ] Can add pricing.
+[ ] Can upload photos.
+[ ] Can submit for approval.
+[ ] Can manage bookings.
+[ ] Can see revenue.
+[ ] Can receive notifications.
+
+Admin:
+[ ] Can view dashboard metrics.
+[ ] Can manage users.
+[ ] Can manage venue owners.
+[ ] Can approve/reject venues.
+[ ] Can manage bookings.
+[ ] Can manage payments/refunds.
+[ ] Can manage events.
+[ ] Can manage reviews.
+[ ] Can manage discounts.
+[ ] Can manage sports/amenities.
+[ ] Can manage settings/content.
+[ ] Can view activity logs.
+
+Technical:
+[ ] PostgreSQL production DB configured.
+[ ] Redis configured.
+[ ] Celery worker configured.
+[ ] Celery beat configured.
+[ ] Stripe configured.
+[ ] SMTP configured.
+[ ] Mapbox configured or hidden gracefully.
+[ ] Static/media configured.
+[ ] Environment variables secured.
+[ ] Tests added.
+[ ] Backups configured.
+[ ] Logs/monitoring configured.
+[ ] Production deployment documented.
+
+======================================================================
+9. RECOMMENDED IMPLEMENTATION ORDER INSIDE THE 10 STAGES
+======================================================================
+
+Fastest practical order:
+1. Stabilize local baseline.
+2. Fix UI consistency and header.
+3. Improve homepage and sports categories.
+4. Improve venue listing.
+5. Rebuild venue detail booking UX.
+6. Complete booking backend safety.
+7. Complete Stripe test payment.
+8. Add booking notifications.
+9. Improve player dashboard.
+10. Improve venue owner operations.
+11. Improve admin operations.
+12. Complete events.
+13. Add reports, maps, SEO, and growth features.
+14. Harden security.
+15. Deploy staging/production.
+
+Do not start with advanced growth features before the booking and payment path is reliable.
+
+======================================================================
+10. CONCLUSION
+======================================================================
+
+SportMeet is worth continuing because the existing project already includes the main domain pieces of a real sports marketplace:
+- Users.
+- Venue owners.
+- Admin.
+- Venues.
+- Courts.
+- Bookings.
+- Events.
+- Payments.
+- Reviews.
+- Discounts.
+- Reports.
+- Settings.
+
+The strongest continuation path is:
+1. Stabilize and clean the existing codebase.
+2. Make the public website polished and data-rich.
+3. Make venue discovery and booking reliable.
+4. Complete payment, discount, cancellation, and notification flows.
+5. Make player, venue owner, and admin dashboards operational.
+6. Complete events.
+7. Add trust, moderation, maps, SEO, and growth features.
+8. Harden security and deploy with PostgreSQL, Redis, Celery, static/media hosting, logs, and backups.
+
+Once these 10 stages are completed, SportMeet can move from a discontinued demo-style project into a production-ready sports venue and event booking platform.

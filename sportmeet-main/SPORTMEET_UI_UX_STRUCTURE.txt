@@ -1,0 +1,855 @@
+SPORTMEET UI/UX STRUCTURE AND APPLICATION FLOW
+Generated locally: 2026-05-27
+
+1. PURPOSE OF THIS DOCUMENT
+
+This file explains the current UI/UX structure of the SportMeet application so new improvements can be planned clearly.
+
+It covers:
+- The application purpose
+- User roles
+- Main navigation
+- Page-by-page UI structure
+- Current data shown on each section
+- Important UX gaps
+- Recommended design improvements
+- Areas that should not be left empty
+
+2. PRODUCT SUMMARY
+
+SportMeet is a sports venue and event marketplace.
+
+Primary user goals:
+- Discover sports venues
+- Book courts/time slots
+- Browse and join events
+- Explore sports categories
+- Register as a player or venue owner
+- Manage personal bookings
+- Allow venue owners to manage their venues and bookings
+- Allow admins to manage the full platform
+
+Core product promise:
+"Discover, Book & Play."
+
+The app currently has three main role experiences:
+1. Public/player experience
+2. Venue-owner experience
+3. Admin dashboard experience
+
+3. TECHNICAL UI STACK
+
+Frontend:
+- React 18
+- Create React App
+- React Router
+- React Query
+- Axios
+- Tailwind CSS
+- Lucide React icons
+- Mapbox GL dependency
+- Stripe React dependency
+
+Backend:
+- Django
+- Django REST Framework
+- Token authentication
+- SQLite locally
+- Media files served from /media/ in local debug mode
+
+Local frontend:
+http://127.0.0.1:5000/
+
+Local backend:
+http://127.0.0.1:8000/api/
+
+4. IMPORTANT LOCAL UI FIXES ALREADY APPLIED
+
+Images were not loading because Django DEBUG was resolving as False due a system environment variable DEBUG=release.
+
+Fix applied:
+- Added DJANGO_DEBUG=True in backend/.env
+- Updated settings.py to prefer DJANGO_DEBUG over DEBUG
+- Restarted backend
+- Verified /media/demo/generated-venue.png returns 200
+
+Single/detail pages issue:
+- Event detail page used event.cover_image, but API returns cover_image_url.
+- Fixed EventDetailPage.js to use cover_image_url.
+- Venue detail API was already returning gallery_images correctly.
+
+Venue filtering issue:
+- SQLite crashed on sport_category filtering because JSONField contains lookup is not supported.
+- Fixed venues/views.py to use icontains for SQLite.
+- Fixed price filters/sorting to use court pricing instead of removed base_price_per_hour.
+
+5. GLOBAL LAYOUT
+
+Main public layout:
+src/components/Layout/Layout.js
+
+Header:
+src/components/Layout/Header.js
+
+Floating menu:
+src/components/Layout/FloatingMenu.js
+
+Admin layout:
+src/components/Admin/AdminLayout.js
+
+Protected route wrapper:
+src/components/ProtectedRoute.js
+
+Global providers:
+src/App.js wraps the application with:
+- QueryClientProvider
+- ThemeProvider
+- SiteProvider
+- AuthProvider
+- BrowserRouter
+
+6. MAIN ROUTE STRUCTURE
+
+Public routes:
+/ -> HomePage
+/venues -> VenueDiscoveryPage
+/venues/:id -> VenueBookingPage
+/sports -> SportsPage
+/events -> EventsPage
+/events/:id -> EventDetailPage
+/event-booking-confirmation -> BookingConfirmationEventPage
+/booking-confirmation/:id -> BookingConfirmationPage
+/faq -> StaticPage
+/terms -> StaticPage
+/privacy -> StaticPage
+/cookies -> StaticPage
+/support -> StaticPage
+/login -> LoginPage
+/register -> RegisterPage
+/register-venue-owner -> VenueOwnerRegistrationPage
+/register-venue -> VenueRegistrationPage
+
+Protected user/venue-owner routes:
+/bookings -> BookingsPage
+/bookings/:id -> BookingDetailPage
+/dashboard -> DashboardPage
+/profile -> ProfilePage
+/reviews -> ReviewsPage
+/venues/create -> CreateVenuePage
+/venues/:id/edit -> VenueOwnerEditVenuePage
+/venues/manage -> VenueOwnerVenuesPage
+/bookings/venue -> VenueOwnerBookingsPage
+
+Admin routes:
+/admin -> AdminDashboard
+/admin/analytics -> AnalyticsPage
+/admin/users -> UsersPage
+/admin/users/venue-owners -> VenueOwnersPage
+/admin/venues -> Admin Venues
+/admin/venues/create -> CreateVenuePage
+/admin/venues/:id/edit -> EditVenuePage
+/admin/venues/sports -> Admin Sports
+/admin/venues/amenities -> AmenitiesPage
+/admin/bookings -> Admin Bookings
+/admin/events -> Admin Events
+/admin/events/create -> CreateEventPage
+/admin/events/:id/edit -> EditEventPage
+/admin/events/bookings -> EventBookingsPage
+/admin/payments -> PaymentsPage
+/admin/reviews -> ReviewsPage
+/admin/activity-log -> ActivityLogPage
+/admin/discounts -> DiscountsPage
+/admin/settings -> SettingsPage
+/admin/social-keys -> SocialKeysPage
+
+7. HOMEPAGE UI STRUCTURE
+
+File:
+src/pages/HomePage.js
+
+Current sections:
+1. Header / navigation
+2. Hero section
+3. Location search
+4. Hero image/slider
+5. Book Venues section
+6. Upcoming Events section
+7. Select Sport section
+8. Who We Are section
+9. Footer
+
+Hero:
+- Uses siteSettings.site_name
+- Uses siteSettings.site_description
+- Uses sliderImages from SiteContext
+- Has search input "Enter City or Area"
+- Has "Locate me" button
+
+Book Venues:
+- Fetches /api/venues/?status=approved&limit=8
+- Displays horizontal venue cards
+- Each card includes venue image, venue name, city, rating, ID, and View & Book button
+- Links to /venues/:id
+
+Upcoming Events:
+- Fetches /api/events/?limit=6
+- Displays event image, date, title, host, time, location, price, and sport
+- Links to /events/:id
+
+Select Sport:
+- Fetches /api/venues/sports/
+- Displays sports category image cards
+- Links to /venues?sport_category=<sport>
+
+Who We Are:
+- Text content currently hard-coded in HomePage.js
+- Image comes from siteSettings.who_we_are_image
+
+UX notes:
+- Homepage is now data-backed and has fallbacks.
+- The header currently appears visually repeated/overloaded in the user's screenshot. This should be reviewed in Header.js and FloatingMenu.js.
+- Hero layout currently uses a split text/image layout. It works, but a stronger marketplace UI could use a full-width visual hero with search over image.
+- Sections should always show demo cards instead of error-only text where possible.
+
+Recommended homepage improvements:
+- Reduce duplicated nav text.
+- Use one clean sticky header.
+- Make search prominent and connected to venue listing.
+- Add category shortcut chips under search: Badminton, Football, Tennis, Basketball, Cricket.
+- Add "Popular near you" or "Featured venues" label.
+- Add trust stats: venues listed, bookings made, events hosted.
+- Replace generic Who We Are text with shorter marketplace copy.
+- Add CTA strip for venue owners.
+
+8. VENUE DISCOVERY PAGE UI STRUCTURE
+
+File:
+src/pages/VenueDiscoveryPage.js
+
+Route:
+/venues
+
+Purpose:
+Allow users to browse and filter sports venues.
+
+Current UI:
+- Hero header with title "Discover Sports Venues"
+- Search input
+- Sidebar filters
+- Sport dropdown
+- Price range min/max
+- Location block
+- Radius dropdown when location exists
+- Sort dropdown
+- Venue listing cards
+
+Venue card currently shows:
+- Venue image
+- Name
+- City/state
+- Distance if user location exists
+- Featured badge if available
+- Description
+- Sports count
+- Currency/pricing by court
+- Rating
+- Phone/contact fallback
+- Email/full address fallback
+- Book Now button
+
+Data source:
+/api/venues/
+
+Known UX risks:
+- Browser geolocation may set user location automatically and filter results unexpectedly.
+- Mapbox token is empty, so location search should degrade gracefully.
+- Price filtering now uses court price, but UI copy should say "court price" instead of "venue price".
+- Empty state should recommend clearing filters and show popular venues.
+
+Recommended improvements:
+- Add grid/list toggle.
+- Add sport chips instead of only dropdown.
+- Show minimum court price from API.
+- Show court count.
+- Show rating count.
+- Add "Open today" if availability data supports it.
+- Add image skeleton loading.
+- Add pagination or load more.
+- Add a map/list split view only after Mapbox is configured.
+
+9. VENUE DETAIL / BOOKING PAGE UI STRUCTURE
+
+File:
+src/pages/VenueBookingPage.js
+
+Route:
+/venues/:id
+
+Purpose:
+Show one venue and allow court/time booking.
+
+Current UI:
+- Back to venues button
+- Photo card using ImageSlider
+- Venue info card
+- Address, phone, email, rating
+- Description
+- Share button
+- Write review button
+- Map/location card
+- Booking panel
+- Sport selection
+- Court selection
+- Time slot selection
+- Duration summary
+- Special requests textarea
+- Booking summary
+- Discount code input
+- Book Now button
+- Payment modal
+- Guest checkout modal
+- Review modal
+
+Data sources:
+- /api/venues/:id/
+- /api/venues/:id/availability/
+- /api/bookings/venue-booked-slots/
+- /api/bookings/multi-court/
+- /api/bookings/guest-multi-court/
+- /api/payments/create-intent/
+- /api/payments/confirm/
+
+Known UX risks:
+- The booking page is feature-rich but dense.
+- Payment flow requires Stripe keys.
+- If Mapbox token is empty, map should show a static placeholder.
+- Some text has encoding artifacts in older content.
+- The guest modal appears inside the payment modal, which can feel nested/confusing.
+
+Recommended improvements:
+- Make venue photos full-width at top.
+- Move booking widget to sticky right column on desktop.
+- Use a clear 3-step booking flow:
+  1. Select sport/court
+  2. Select date/time
+  3. Confirm details/payment
+- Show court cards with image, sport, indoor/outdoor, capacity, price.
+- Make unavailable slots visually distinct.
+- Add login/guest choice before opening payment.
+- Add "No Stripe configured" demo mode message until Stripe keys are valid.
+- Add breadcrumbs.
+
+10. EVENTS LIST PAGE UI STRUCTURE
+
+File:
+src/pages/EventsPage.js
+
+Route:
+/events
+
+Purpose:
+Browse public sports events.
+
+Current UI:
+- Page title "Sports Events"
+- Subtitle
+- Search input
+- Filter button placeholder
+- Grid/list toggle
+- Event cards
+
+Event card includes:
+- Event image
+- Date badge
+- Title
+- Host
+- Time
+- Location
+- Price
+- Sport
+
+Data source:
+/api/events/
+
+Known UX gaps:
+- Filter button exists but does not open a real filter panel.
+- event_type and sport_category filters exist in state but are not controlled by visible UI.
+- List mode only changes grid columns, not card layout.
+
+Recommended improvements:
+- Add filter dropdowns for sport, event type, date range, city, free/paid.
+- Add featured events carousel.
+- Add "Register now" CTA.
+- Add capacity display.
+- Add event status chips.
+- Add empty state with upcoming demo suggestions.
+
+11. EVENT DETAIL PAGE UI STRUCTURE
+
+File:
+src/pages/EventDetailPage.js
+
+Route:
+/events/:id
+
+Purpose:
+Show one event and let user register/book event slot.
+
+Current UI:
+- Back to events button
+- Event image
+- Event title
+- Host
+- Status badge
+- Event type badge
+- Share button
+- Description
+- Additional information: rules, requirements, prizes
+- Sidebar event details
+- Host
+- Date/time
+- Location
+- Price
+- Participants
+- Registration Open status
+- Book your slot button
+- Location map placeholder
+- EventBookingModal
+
+Data source:
+/api/events/:id/
+
+Recent fix:
+- Event detail now uses cover_image_url, not only cover_image.
+
+Known UX gaps:
+- Participant count used two possible names; should standardize on participant_count.
+- Paid event booking depends on payment flow and Stripe keys.
+- Event registration flow needs full E2E testing.
+- Mapbox token is not configured.
+
+Recommended improvements:
+- Make event image hero larger.
+- Show "spots left".
+- Add event tags: sport, city, type, paid/free.
+- Add organizer card.
+- Add participant list preview.
+- Add cancellation/refund rules.
+- Add related events.
+
+12. SPORTS PAGE UI STRUCTURE
+
+File:
+src/pages/SportsPage.js
+
+Route:
+/sports
+
+Purpose:
+Browse sports categories and jump into filtered venues.
+
+Current UI:
+- Header with search
+- Category filter buttons
+- Sports grid
+- Popular sports section
+
+Sports card includes:
+- Image
+- Sport name
+- Find Venues CTA
+
+Data source:
+/api/venues/sports/
+
+Recent update:
+- Rebuilt to use clean text labels and real image URLs.
+- Removed broken encoded icon display.
+
+Known UX gaps:
+- All sports currently use the same generated category image.
+- Category grouping is frontend-hardcoded by sport names.
+- It does not show venue count per sport.
+
+Recommended improvements:
+- Add unique images per sport.
+- Add venue counts from API.
+- Add popular/trending state.
+- Add "near me" sport shortcuts.
+- Add training/events availability per sport.
+
+13. AUTH PAGES UI STRUCTURE
+
+Files:
+src/pages/LoginPage.js
+src/pages/RegisterPage.js
+src/pages/VenueOwnerRegistrationPage.js
+src/pages/VenueRegistrationPage.js
+
+Purpose:
+Allow users to login or register as players/venue owners.
+
+Known UX notes:
+- Login is required for protected pages.
+- Venue owner registration exists as a distinct flow.
+- Social login UI/components exist but need OAuth keys.
+- Some pages may contain unused imports and older validation copy.
+
+Recommended improvements:
+- Make user type selection clear.
+- Add benefit panels for players vs venue owners.
+- Add password visibility toggle.
+- Add better form validation messages.
+- Add post-login redirect clarity.
+- Add demo credentials helper in local/demo mode only.
+
+14. USER DASHBOARD UI STRUCTURE
+
+Files:
+src/pages/DashboardPage.js
+src/pages/ProfilePage.js
+src/pages/BookingsPage.js
+src/pages/BookingDetailPage.js
+src/pages/ReviewsPage.js
+
+Purpose:
+Allow player/user to manage personal activity.
+
+Current likely sections:
+- Profile details
+- My bookings
+- Booking detail
+- Reviews
+- Dashboard summary
+
+Known UX gaps:
+- Needs review with live data.
+- Booking detail has a lint warning for mixed && and || operators.
+- Empty states should show recommended venues/events.
+
+Recommended improvements:
+- Add dashboard cards: upcoming bookings, past bookings, joined events, reviews.
+- Add quick actions: Book a venue, Browse events, Edit profile.
+- Add booking status timeline.
+- Add cancellation flow with policy display.
+
+15. VENUE OWNER UI STRUCTURE
+
+Files:
+src/pages/VenueOwnerDashboard.js
+src/pages/VenueOwnerVenuesPage.js
+src/pages/VenueOwnerBookingsPage.js
+src/pages/VenueOwnerEditVenuePage.js
+src/pages/Admin/CreateVenuePage.js is reused in places
+
+Purpose:
+Allow venue owners to manage their venue business.
+
+Current capabilities:
+- Manage venues
+- Edit venue
+- View venue bookings
+- Create venues
+- Upload venue/court images
+- Configure courts and availability
+
+Known UX gaps:
+- Owner flow needs clearer separation from admin flow.
+- Venue creation/editing is long and complex.
+- Courts, images, pricing, availability should be separated into tabs/steps.
+
+Recommended improvements:
+- Venue-owner dashboard:
+  - Revenue
+  - Upcoming bookings
+  - Pending approvals
+  - Venue status
+  - Reviews
+- Venue editor tabs:
+  1. Basics
+  2. Location
+  3. Sports/courts
+  4. Availability
+  5. Pricing
+  6. Photos
+  7. Policies
+- Add preview mode before submitting.
+
+16. ADMIN DASHBOARD UI STRUCTURE
+
+Files:
+src/components/Admin/AdminLayout.js
+src/pages/Admin/AdminDashboard.js
+src/pages/Admin/*.js
+
+Purpose:
+Manage entire platform.
+
+Admin sections:
+- Dashboard
+- Analytics
+- Users
+- Venue owners
+- Venues
+- Create/edit venues
+- Sports
+- Amenities
+- Bookings
+- Events
+- Event bookings
+- Payments
+- Reviews
+- Activity log
+- Discounts
+- Settings
+- Social keys
+
+Data sources:
+- /api/core/admin/dashboard-stats/
+- /api/core/admin/recent-activity/
+- /api/core/admin/top-venues/
+- /api/users/
+- /api/venues/admin/
+- /api/bookings/admin/
+- /api/events/admin/
+- /api/payments/admin/
+- /api/reviews/admin/
+- /api/discounts/
+
+Known UX gaps:
+- Admin stats use some older language, e.g. active venues vs approved venues.
+- Activity log may not be fully backed by real audit logging.
+- Settings page handles branding/static content but needs cleaner content editing.
+- Some admin pages have unused imports and warning noise.
+
+Recommended improvements:
+- Standard admin dashboard cards:
+  - Total users
+  - Venue owners
+  - Approved venues
+  - Pending venues
+  - Bookings
+  - Revenue
+  - Events
+  - Reviews
+- Add tables with consistent filters, status badges, row actions.
+- Add modals for approve/reject.
+- Add bulk actions.
+- Add audit trail.
+- Add admin role/permission management.
+
+17. VISUAL STYLE CURRENT STATE
+
+Current style:
+- Tailwind utility classes
+- White/gray backgrounds
+- Blue primary color
+- Green accent color
+- Card-based listings
+- Rounded cards
+- Lucide icons
+- Some gradients on older pages
+
+Strengths:
+- Clean SaaS-like structure
+- Familiar cards/tables/forms
+- Many routes already exist
+- Admin surface is broad
+- Data structure supports a real marketplace
+
+Weaknesses:
+- Some pages feel inconsistent.
+- Public marketplace pages need more polish and stronger imagery.
+- Headers/navigation can look duplicated.
+- Empty/error states were too plain.
+- Some older text/icons have encoding artifacts.
+- Some forms are long and need step/tabs.
+
+18. RECOMMENDED UI/UX DIRECTION
+
+Public site:
+Should feel like a modern sports marketplace.
+
+Tone:
+- Active
+- Trustworthy
+- Local/community-focused
+- Booking-first
+- Not overly decorative
+
+Design direction:
+- Strong imagery
+- Clean search
+- Venue cards with useful info
+- Clear price and availability
+- Event cards with dates and capacity
+- Sport categories with visual thumbnails
+
+Admin/owner dashboard:
+Should feel operational and efficient.
+
+Tone:
+- Dense but clear
+- Fast scanning
+- Status-first
+- Tables and filters
+- Low decoration
+
+Design direction:
+- Consistent sidebar
+- Compact stats cards
+- Search/filter bars
+- Status chips
+- Row actions
+- Clear approval workflows
+
+19. PAGES THAT SHOULD NEVER LOOK EMPTY
+
+Homepage:
+- Always show featured venues, upcoming events, sports categories, and CTA content.
+
+Venues:
+- If filters return no results, show recommended popular venues and a clear "Clear filters" button.
+
+Venue detail:
+- Always show image, address, sports, courts, availability placeholder, and contact info.
+
+Events:
+- If no events match search, show upcoming featured events and "clear filters".
+
+Event detail:
+- Always show cover image/fallback, event details, organizer, location, capacity, and registration status.
+
+Sports:
+- Always show sports categories. If API fails, show fallback seeded sports.
+
+User dashboard:
+- If user has no bookings, show "Book your first venue" and recommended venues.
+
+Venue owner:
+- If no venues, show onboarding checklist and "Create venue".
+
+Admin:
+- If no data, show setup checklist and seed/demo status.
+
+20. CURRENT DEMO DATA FOR UI REVIEW
+
+Venues:
+- Melbourne Sports Complex
+- Sydney Athletic Centre
+- Brisbane Racquet Hub
+- Perth Aquatic & Fitness Arena
+- Adelaide Community Courts
+- Canberra Training Dome
+- Hobart Racquet & Squash Club
+- Gold Coast Beach Sports Park
+- Newcastle Hockey & Field Centre
+- Darwin Indoor Sports Hall
+
+Events:
+- Friday Night Tennis Ladder
+- 3x3 Basketball Community Cup
+- Weekend Cricket Skills Clinic
+- Mixed Netball Social Night
+- Beginner Boxing Bootcamp
+- Squash Round Robin
+- Beach Volleyball Pairs Cup
+- Junior Hockey Skills Day
+- Friday Futsal League Trial
+- Athlete Recovery Yoga
+
+Sports:
+- Badminton
+- Cricket
+- Football
+- Basketball
+- Tennis
+- Swimming
+- Volleyball
+- Futsal
+- Netball
+- Table Tennis
+- Squash
+- Yoga
+- Boxing
+- Running
+- Hockey
+- Martial Arts
+
+21. KNOWN TECHNICAL WARNINGS
+
+Frontend build succeeds, but there are many lint warnings:
+- Unused imports/variables
+- React hook dependency warnings
+- Redundant image alt warnings
+- One mixed operator warning in BookingDetailPage
+
+These do not block demo usage but should be cleaned before serious redesign work.
+
+22. SUGGESTED IMPROVEMENT BRIEF FORMAT
+
+When providing new improvements, it would help to structure them like this:
+
+1. Homepage changes
+- Header/nav:
+- Hero:
+- Search:
+- Venue cards:
+- Event cards:
+- Sports categories:
+- Who We Are:
+- Footer:
+
+2. Venue listing changes
+- Filters:
+- Card layout:
+- Empty states:
+- Mobile layout:
+
+3. Venue detail/booking changes
+- Gallery:
+- Booking steps:
+- Court cards:
+- Payment/guest flow:
+
+4. Events changes
+- Listing filters:
+- Event detail:
+- Registration:
+
+5. Sports page changes
+- Category design:
+- Sport detail needs:
+
+6. Admin/venue-owner changes
+- Dashboard:
+- Tables:
+- Forms:
+- Approval flows:
+
+7. Visual design
+- Colors:
+- Typography:
+- Spacing:
+- Image style:
+- Buttons:
+- Cards:
+
+23. CURRENT STATUS AFTER THIS PASS
+
+Verified:
+- Local media URLs return 200.
+- Venue detail API returns gallery image URLs.
+- Event detail API returns cover_image_url.
+- Frontend /venues/1 route returns 200.
+- Frontend /events/1 route returns 200.
+- SQLite sport filter no longer crashes.
+- Frontend production build succeeds with warnings only.
+
+Most important next UI work:
+1. Remove duplicate/overcrowded header behavior.
+2. Redesign homepage hero and section hierarchy.
+3. Improve venue detail booking flow into clear steps.
+4. Add unique imagery per sport.
+5. Clean admin dashboard metric labels and table consistency.
+6. Clean lint warnings so future bugs are easier to catch.

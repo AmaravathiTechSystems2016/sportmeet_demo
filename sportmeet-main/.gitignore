@@ -18,3 +18,7 @@ coverage/
 *.swp
 *.swo
 *.pid
+*.seed
+*.pid.lock
+*.log
+*.gz

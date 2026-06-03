@@ -1,6 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from 'react-query';
+import { HelmetProvider } from 'react-helmet-async';
 import { AuthProvider } from './contexts/AuthContext';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { SiteProvider } from './contexts/SiteContext';
@@ -63,8 +64,9 @@ const queryClient = new QueryClient({
 
 function App() {
   return (
-    <BrowserRouter>
-      <QueryClientProvider client={queryClient}>
+    <HelmetProvider>
+      <BrowserRouter>
+        <QueryClientProvider client={queryClient}>
         <ThemeProvider>
           <SiteProvider>
             <AuthProvider>
@@ -85,6 +87,9 @@ function App() {
                        <Route path="privacy" element={<StaticPage slug="privacy" title="Privacy Policy" />} />
                        <Route path="cookies" element={<StaticPage slug="cookies" title="Cookie Policy" />} />
                        <Route path="support" element={<StaticPage slug="support" title="Support" />} />
+                       <Route path="cancellation-policy" element={<StaticPage slug="cancellation" title="Cancellation Policy" />} />
+                       <Route path="refund-policy" element={<StaticPage slug="refund" title="Refund Policy" />} />
+                       <Route path="venue-owner-guide" element={<StaticPage slug="venue-owner-guide" title="Venue Owner Guide" />} />
                        <Route path="login" element={<LoginPage />} />
                        <Route path="register" element={<RegisterPage />} />
                        <Route path="register-venue-owner" element={<VenueOwnerRegistrationPage />} />
@@ -206,8 +211,9 @@ function App() {
             </AuthProvider>
           </SiteProvider>
         </ThemeProvider>
-      </QueryClientProvider>
-    </BrowserRouter>
+        </QueryClientProvider>
+      </BrowserRouter>
+    </HelmetProvider>
   );
 }
 

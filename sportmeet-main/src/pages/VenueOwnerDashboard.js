@@ -71,6 +71,21 @@ const VenueOwnerDashboard = () => {
     });
     return { totalRevenue, totalBookings };
   }, [ownerBookings]);
+  const onboardingItems = useMemo(() => {
+    const hasVenue = myVenuesArr.length > 0;
+    const hasApprovedVenue = myVenuesArr.some((venue) => venue.status === 'approved');
+    const hasCourts = myVenuesArr.some((venue) => Number(venue.courts?.length || venue.court_count || 0) > 0);
+    const hasPhotos = myVenuesArr.some((venue) => venue.cover_image_url || Number(venue.gallery_images?.length || 0) > 0);
+    const hasBooking = ownerTotals.totalBookings > 0;
+
+    return [
+      { label: 'Create your first venue', done: hasVenue, href: '/venues/create' },
+      { label: 'Add courts and pricing', done: hasCourts, href: '/venues/manage' },
+      { label: 'Upload venue photos', done: hasPhotos, href: '/venues/manage' },
+      { label: 'Submit and get approval', done: hasApprovedVenue, href: '/venues/manage' },
+      { label: 'Receive your first booking', done: hasBooking, href: '/bookings/venue' },
+    ];
+  }, [myVenuesArr, ownerTotals.totalBookings]);
   const averageRating = useMemo(() => {
     // If backend provides owner-scoped review stats, use them first
     const backendAvg = Number(stats?.data?.reviews?.average_rating);
@@ -128,36 +143,53 @@ const VenueOwnerDashboard = () => {
       description: 'View and edit your venues',
       icon: Building,
       href: '/venues/manage',
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-primary-600',
+      bgColor: 'bg-primary-50',
     },
     {
       title: 'View Bookings',
       description: 'Manage venue bookings',
       icon: Calendar,
       href: '/bookings/venue',
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-teal-600',
+      bgColor: 'bg-teal-50',
     },
     {
       title: 'Analytics',
       description: 'View venue performance',
       icon: BarChart3,
-      href: '/analytics',
+      href: '/bookings/venue',
       color: 'text-orange-600',
       bgColor: 'bg-orange-50',
     },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F7FAF8]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Venue Owner Dashboard</h1>
-          <p className="text-lg text-gray-600">
-            Manage your venues, bookings, and grow your business.
-          </p>
+        <div className="mb-8 overflow-hidden rounded-3xl bg-slate-950 p-6 text-white md:p-8">
+          <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+            <div>
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-lime-200">
+                <Building className="h-4 w-4" />
+                Venue owner workspace
+              </p>
+              <h1 className="text-3xl font-extrabold md:text-4xl">Venue Owner Dashboard</h1>
+              <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+                Manage venues, monitor bookings, review customer feedback, and keep your courts ready for players.
+              </p>
+            </div>
+            <div className="flex flex-wrap gap-3">
+              <Link to="/venues/create" className="btn btn-primary">
+                <Plus className="mr-2 h-4 w-4" />
+                Add Venue
+              </Link>
+              <Link to="/venues/manage" className="btn btn-outline border-white/25 text-white hover:bg-white/10">
+                Manage Venues
+              </Link>
+            </div>
+          </div>
         </div>
 
         {/* Stats Cards */}
@@ -165,7 +197,7 @@ const VenueOwnerDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Venues</p>
@@ -207,7 +239,7 @@ const VenueOwnerDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Star className="h-8 w-8 text-purple-600" />
+                <Star className="h-8 w-8 text-primary-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Average Rating</p>
@@ -292,13 +324,13 @@ const VenueOwnerDashboard = () => {
                   {myVenuesArr.slice(0, 3).map((venue) => (
                     <div key={venue.id} className="flex items-center justify-between p-4 border border-gray-200 rounded-lg">
                       <div className="flex items-center">
-                        <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center mr-4">
-                          <Building className="w-6 h-6 text-blue-600" />
+                        <div className="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center mr-4">
+                          <Building className="w-6 h-6 text-primary-600" />
                         </div>
                         <div>
                           <h4 className="font-medium text-gray-900">{venue.name}</h4>
                           <p className="text-sm text-gray-500">
-                            {venue.city}, {venue.state} • {venue.sport_categories?.join(', ')}
+                            {venue.city}, {venue.state} - {venue.sport_categories?.join(', ')}
                           </p>
                         </div>
                       </div>
@@ -310,9 +342,11 @@ const VenueOwnerDashboard = () => {
                             <span className="text-sm text-gray-500">{venue.average_rating || '0.0'}</span>
                           </div>
                         </div>
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
+                        <Link to={`/venues/${venue.id}/edit`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </Link>
                       </div>
                     </div>
                   ))}
@@ -330,6 +364,40 @@ const VenueOwnerDashboard = () => {
               )}
             </Card>
           </div>
+        </div>
+
+        <div className="mt-8">
+          <Card className="p-6">
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-medium text-gray-900">Venue setup checklist</h3>
+                <p className="mt-1 text-sm text-gray-600">Complete these steps to make your venues booking-ready.</p>
+              </div>
+              <span className="rounded-full bg-primary-50 px-3 py-1 text-sm font-semibold text-primary-700">
+                {onboardingItems.filter((item) => item.done).length}/{onboardingItems.length}
+              </span>
+            </div>
+            <div className="grid gap-3 md:grid-cols-5">
+              {onboardingItems.map((item) => (
+                <Link
+                  key={item.label}
+                  to={item.href}
+                  className={`rounded-lg border p-4 transition ${
+                    item.done
+                      ? 'border-primary-200 bg-primary-50'
+                      : 'border-gray-200 bg-white hover:border-primary-300 hover:bg-primary-50'
+                  }`}
+                >
+                  <div className={`mb-3 flex h-8 w-8 items-center justify-center rounded-full text-sm font-bold ${
+                    item.done ? 'bg-primary-500 text-white' : 'bg-gray-100 text-gray-500'
+                  }`}>
+                    {item.done ? 'Done' : 'Next'}
+                  </div>
+                  <p className="text-sm font-medium text-gray-900">{item.label}</p>
+                </Link>
+              ))}
+            </div>
+          </Card>
         </div>
 
         {/* Upcoming Bookings */}
@@ -357,7 +425,7 @@ const VenueOwnerDashboard = () => {
                       <div>
                         <h4 className="font-medium text-gray-900">{booking.venue.name}</h4>
                         <p className="text-sm text-gray-500">
-                          {new Date(booking.booking_date).toLocaleDateString()} • {booking.start_time} - {booking.end_time}
+                          {new Date(booking.booking_date).toLocaleDateString()} - {booking.start_time} - {booking.end_time}
                         </p>
                         <p className="text-sm text-gray-500">
                           Customer: {booking.user?.first_name || booking.user_name || 'N/A'} {booking.user?.last_name || ''}
@@ -396,7 +464,7 @@ const VenueOwnerDashboard = () => {
           <Card className="p-6">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-medium text-gray-900 flex items-center">
-                <MessageSquare className="w-5 h-5 text-blue-600 mr-2" />
+                <MessageSquare className="w-5 h-5 text-primary-600 mr-2" />
                 Recent Reviews
               </h3>
               <Button variant="outline" size="sm" onClick={() => window.location.href = '/reviews?venue_owner=me&is_approved='}>
@@ -414,8 +482,8 @@ const VenueOwnerDashboard = () => {
                   <div key={review.id} className="p-4 border border-gray-200 rounded-lg">
                     <div className="flex items-start justify-between mb-2">
                       <div className="flex items-center space-x-3">
-                        <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                          <span className="text-sm font-medium text-blue-600">
+                        <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+                          <span className="text-sm font-medium text-primary-600">
                             {review.user_name?.charAt(0) || 'U'}
                           </span>
                         </div>
@@ -507,7 +575,7 @@ const VenueOwnerDashboard = () => {
 
           <Card className="p-6">
             <div className="flex items-center mb-4">
-              <Settings className="w-6 h-6 text-purple-600 mr-3" />
+              <Settings className="w-6 h-6 text-primary-600 mr-3" />
               <h3 className="text-lg font-medium text-gray-900">Settings</h3>
             </div>
             <p className="text-gray-600 mb-4">Manage your account and venue preferences.</p>

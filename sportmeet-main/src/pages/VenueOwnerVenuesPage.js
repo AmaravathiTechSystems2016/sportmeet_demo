@@ -99,7 +99,7 @@ const VenueOwnerVenuesPage = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <Building className="h-8 w-8 text-blue-600" />
+                <Building className="h-8 w-8 text-primary-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Venues</p>
@@ -142,7 +142,7 @@ const VenueOwnerVenuesPage = () => {
           <Card className="p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <DollarSign className="h-8 w-8 text-purple-600" />
+                <DollarSign className="h-8 w-8 text-primary-600" />
               </div>
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-500">Total Revenue</p>
@@ -215,7 +215,7 @@ const VenueOwnerVenuesPage = () => {
                 <div className="flex space-x-2">
                   <Link 
                     to={`/venues/${venue.id}`}
-                    className="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors"
+                    className="flex-1 bg-primary-50 hover:bg-primary-100 text-primary-700 px-3 py-2 rounded-lg text-sm font-medium text-center transition-colors"
                   >
                     <Eye className="w-4 h-4 inline mr-1" />
                     View

@@ -1,0 +1,1264 @@
+SPORTMEET EXISTING UI/UX AUDIT AND HOMEPAGE IMPROVEMENT NOTES
+Generated locally: 2026-06-03
+
+Purpose
+This document explains the current UI/UX of the SportMeet application only.
+It is intended to help decide what should be improved visually, structurally, and experientially before more feature work is planned.
+
+This document focuses on:
+- Frontpage / homepage.
+- Public navigation.
+- Venue discovery and venue booking UI.
+- Events and sports pages.
+- Login/register/profile pages.
+- Player dashboard and bookings.
+- Venue owner dashboard, venues, and bookings pages.
+- Admin dashboard and admin layout.
+- Current strengths.
+- Current UI/UX gaps.
+- Detailed homepage improvement ideas.
+
+This document does not focus on backend code, database logic, or production infrastructure except where those items affect visible UI/UX.
+
+======================================================================
+1. CURRENT DESIGN DIRECTION
+======================================================================
+
+Brand / visual identity:
+- The current visible brand is SportMeet.
+- The product message is "Discover, Book & Play."
+- The latest theme direction uses green as the main brand color.
+- Primary brand color now centers around #2eaf57.
+- Most key public surfaces now use green for primary buttons, active states, and important accents.
+
+Overall product feeling:
+- SportMeet currently feels like a sports marketplace for:
+  - finding venues,
+  - booking courts,
+  - joining events,
+  - managing player activity,
+  - managing venue owner operations,
+  - running admin controls.
+
+Visual style:
+- Clean card-based layout.
+- Light gray page backgrounds.
+- White content cards.
+- Green primary actions.
+- Rounded-md controls and cards.
+- Lucide icons are used widely.
+- Layouts are generally practical and operational rather than decorative.
+
+Current UI maturity:
+- Public pages are present and mostly data-rich.
+- Dashboard pages exist for player, venue owner, and admin.
+- Empty states exist in many areas.
+- Some older screens still use blue/purple styling.
+- Some screens are more polished than others.
+- Some buttons are visible but not always fully functional, especially in profile and some dashboard secondary actions.
+
+======================================================================
+2. GLOBAL NAVIGATION AND LAYOUT
+======================================================================
+
+Public header:
+- Sticky top header.
+- Left side shows logo or "SM" fallback and SportMeet name.
+- Desktop nav includes:
+  - Home
+  - Venues
+  - Events
+  - Sports
+  - List Your Venue
+- Logged-out desktop actions:
+  - Login
+  - Sign Up
+- Logged-in users see an account dropdown.
+- Account dropdown includes:
+  - Admin, if admin user.
+  - Dashboard.
+  - My Venues, if venue owner.
+  - Bookings.
+  - Profile.
+  - Logout.
+
+Mobile navigation:
+- Hamburger menu opens stacked navigation.
+- Links are large enough to tap.
+- Auth links are separated in a bottom mini grid.
+- Overall mobile header is understandable and not overcrowded.
+
+Floating menu:
+- Appears after scroll.
+- Shows compact logo, search input on desktop, public links, venue owner CTA, login/dashboard controls.
+- Useful for long homepage scrolling.
+- Could be refined further because it duplicates some header behavior, but it is currently manageable.
+
+Footer:
+- Footer exists through layout.
+- Contains brand identity and important quick links.
+- Needs richer support/policy/content hierarchy if preparing for production.
+
+Current global UI strengths:
+- Navigation is role-aware.
+- Public and admin areas are visually separated.
+- Primary user paths are reachable from the header.
+- The green brand color is becoming consistent.
+
+Current global UI gaps:
+- Some internal/admin/owner pages still use older blue/purple status colors.
+- Several admin sidebar active states still use blue.
+- Footer content could be more structured.
+- No global breadcrumb system.
+- No global "recently viewed" display yet, although recent venue tracking exists locally.
+- No universal page intro pattern for all dashboards.
+
+Recommended global improvements:
+- Finish replacing remaining blue/purple primary states with #2eaf57 where they represent brand actions.
+- Keep status colors semantic:
+  - green for confirmed/approved/success,
+  - yellow for pending/warning,
+  - red for rejected/cancelled/error,
+  - gray for inactive/neutral,
+  - blue only for informational states if needed.
+- Add breadcrumbs to detail and admin edit pages.
+- Add consistent page headers with title, subtitle, and primary action.
+- Add consistent empty state component across all pages.
+- Add consistent table/list/card action patterns.
+
+======================================================================
+3. HOMEPAGE / FRONTPAGE CURRENT UI/UX
+======================================================================
+
+Current homepage purpose:
+- The homepage is designed as the main marketplace entry point.
+- It quickly communicates that users can discover venues, book courts, and join sports events.
+- It includes search, featured venues, events, sports categories, venue owner CTA, and "Who We Are."
+
+Current homepage sections:
+1. Header.
+2. Hero section.
+3. Hero search.
+4. Quick sport chips.
+5. Trust stats.
+6. Book Venues.
+7. Upcoming Events.
+8. Select Sport.
+9. Venue owner CTA.
+10. Who We Are.
+11. Footer.
+
+----------------------------------------------------------------------
+3.1 Header On Homepage
+----------------------------------------------------------------------
+
+Current behavior:
+- Sticky white header.
+- Public nav is clear.
+- "List Your Venue" is visible.
+- Logged-out users get Login and Sign Up.
+- Logged-in users get dropdown.
+
+Strengths:
+- Clear navigation hierarchy.
+- Easy to move to venues/events/sports.
+- Venue owner CTA is visible.
+
+Gaps:
+- Header could feel more premium with a stronger active/hover style.
+- Account dropdown could include role labels.
+- If many future links are added, desktop nav may become crowded.
+
+Improvement ideas:
+- Add a small "For players" / "For venue owners" split in the account dropdown.
+- Add subtle top-level active underline or pill using #2eaf57.
+- Keep nav short; push secondary links into footer or account menu.
+
+----------------------------------------------------------------------
+3.2 Hero Section
+----------------------------------------------------------------------
+
+Current behavior:
+- Full-width image hero.
+- Uses stable venue demo image.
+- Dark overlay improves text readability.
+- Main headline:
+  "Book Sports Venues & Join Events Near You"
+- Supporting copy:
+  "Find courts, local events, and sports communities in minutes."
+- Badge:
+  "Discover, Book & Play"
+
+Strengths:
+- Product promise is visible immediately.
+- Image makes the page feel less empty.
+- Search is located in the hero where users expect it.
+- Hero does not look like a generic marketing-only section.
+
+Gaps:
+- Hero image is currently fixed to a fallback image.
+- It does not yet use dynamic, curated, high-quality venue images.
+- It does not show live nearby context.
+- It does not show user intent segmentation.
+- The copy is good but could become sharper.
+
+Improvement ideas:
+- Use a curated sports venue hero image instead of generic fallback.
+- Add location-aware text if a city is known.
+  Example: "Book courts in Melbourne today."
+- Add three small benefit chips under the copy:
+  - Instant booking.
+  - Verified venues.
+  - Local sports events.
+- Add a subtle scroll hint or next-section preview.
+- Add a hero overlay mini-stat:
+  - "10+ venues"
+  - "34 courts"
+  - "10 events"
+- Keep hero concise and avoid adding too much text.
+
+----------------------------------------------------------------------
+3.3 Hero Search
+----------------------------------------------------------------------
+
+Current behavior:
+- Search form includes:
+  - city/area/venue input,
+  - sport dropdown,
+  - date input,
+  - Find Venues button.
+- Mapbox autocomplete works only if token is configured.
+- Without Mapbox token, manual search still works.
+- Locate me button exists.
+- Quick sport chips link to venue filtered searches.
+
+Strengths:
+- Search matches marketplace expectations.
+- Search redirects to venues with query parameters.
+- Search supports location, sport, and date.
+- Works without Mapbox token.
+
+Gaps:
+- Date filter is passed to URL but not strongly used by backend availability search yet.
+- Search suggestions depend on Mapbox token.
+- The "Locate me" action could give clearer feedback.
+- The form could be more compact on mobile.
+
+Improvement ideas:
+- Add placeholder examples:
+  - "Melbourne, Sydney, tennis, badminton..."
+- Add clear loading state for "Locate me."
+- Add "Near me" chip as a first-class option.
+- Add popular city chips under search:
+  - Melbourne, Sydney, Brisbane.
+- Make date useful by connecting it to availability.
+- Add search history or recent searches later.
+
+----------------------------------------------------------------------
+3.4 Trust Stats
+----------------------------------------------------------------------
+
+Current behavior:
+- Four stat cards:
+  - Venues Listed.
+  - Bookings Completed.
+  - Events Hosted.
+  - Active Sports.
+- Stats use icons and green accent blocks.
+
+Strengths:
+- Gives confidence after hero.
+- Good quick proof section.
+- Useful when populated by demo data.
+
+Gaps:
+- "Demo" can appear for bookings if backend stats are missing.
+- Stats could include "Verified venues" or "Courts available today."
+
+Improvement ideas:
+- Avoid showing "Demo" as a customer-facing number.
+- Use real numbers only, fallback to friendly labels:
+  - "Growing daily"
+  - "New events weekly"
+- Add verified venue count.
+- Add "sports covered" based on sport API.
+
+----------------------------------------------------------------------
+3.5 Book Venues Section
+----------------------------------------------------------------------
+
+Current behavior:
+- Shows venue cards in a grid.
+- Cards include:
+  - image,
+  - verified badge,
+  - venue name,
+  - city,
+  - rating,
+  - sport tags,
+  - price/court count.
+- Cards link to venue detail/booking.
+
+Strengths:
+- This is one of the strongest homepage sections.
+- Good card density.
+- Images prevent blank feeling.
+- Venue details are useful for scanning.
+
+Gaps:
+- Some sport tags may be missing depending on data.
+- Price display could be clearer.
+- Rating may show "New" without context.
+- Cards could show "Book now" more explicitly.
+
+Improvement ideas:
+- Add visible CTA on each card:
+  - "View & Book"
+- Show "From $X/slot" consistently.
+- Show number of courts with icon.
+- Show top amenity tags.
+- Add hover overlay with "Check availability."
+- Add "Featured" label if venue is featured.
+
+----------------------------------------------------------------------
+3.6 Upcoming Events Section
+----------------------------------------------------------------------
+
+Current behavior:
+- Shows event cards with image, date badge, title, sport, time, location, price, and spots left.
+- Events link to event detail page.
+
+Strengths:
+- Useful second marketplace path.
+- Events look visual and scannable.
+- Free/paid pricing is visible.
+- Spots-left information helps urgency.
+
+Gaps:
+- Events still need richer filters and details on deeper pages.
+- Date/time formatting could be more polished.
+- Event type could be more visible.
+
+Improvement ideas:
+- Add event type chip:
+  - Tournament, Social, Training, League.
+- Add "Register" CTA.
+- Add host/organizer mini line.
+- Add "Free" badge when entry fee is 0.
+- Add capacity progress bar.
+
+----------------------------------------------------------------------
+3.7 Select Sport Section
+----------------------------------------------------------------------
+
+Current behavior:
+- Shows sport cards with sport images.
+- Cards link to venue filtered listing.
+- Venue count is shown.
+- Uses a grid layout.
+
+Strengths:
+- Good shortcut for users who think by sport first.
+- Keeps homepage from being only venue-driven.
+- Venue counts help users understand availability.
+
+Gaps:
+- Sports may reuse fallback images.
+- Some sports need unique, realistic images.
+- Could feel repetitive if all images are similar.
+
+Improvement ideas:
+- Use unique real images for each sport.
+- Add "Popular" or "Trending" badge.
+- Add city-specific counts later.
+- Add sport detail pages later:
+  - /sports/tennis
+  - /sports/badminton
+- Add "Find tennis venues" as accessible text.
+
+----------------------------------------------------------------------
+3.8 Venue Owner CTA
+----------------------------------------------------------------------
+
+Current behavior:
+- Green full-width band.
+- Message:
+  "Own a sports venue?"
+- CTA:
+  "List Your Venue"
+
+Strengths:
+- Clear B2B conversion section.
+- Good contrast.
+- Helps venue owners understand they have a path.
+
+Gaps:
+- CTA does not explain benefits enough.
+- No preview of owner dashboard capabilities.
+
+Improvement ideas:
+- Add 3 benefit bullets:
+  - Manage courts and pricing.
+  - Accept bookings online.
+  - Track revenue and reviews.
+- Add secondary link:
+  - "See venue owner guide"
+- Add small dashboard preview image if available.
+
+----------------------------------------------------------------------
+3.9 Who We Are Section
+----------------------------------------------------------------------
+
+Current behavior:
+- Short text describing SportMeet as a marketplace connecting players, venue owners, and event organizers.
+
+Strengths:
+- Gives a human/product explanation.
+- Keeps homepage from being only transactional.
+
+Gaps:
+- Could be more specific.
+- Could show trust, safety, and local community mission.
+
+Improvement ideas:
+- Split into three columns:
+  - For players.
+  - For venue owners.
+  - For organizers.
+- Add trust/safety messaging.
+- Add support/contact link.
+
+----------------------------------------------------------------------
+3.10 Homepage Priority Improvements
+----------------------------------------------------------------------
+
+Highest priority homepage improvements:
+1. Use curated high-quality unique imagery for hero, venues, events, and sports.
+2. Add clearer CTAs on venue and event cards.
+3. Make search date connect to availability.
+4. Add city and sport quick filters.
+5. Add stronger venue owner CTA with benefits.
+6. Add homepage fallback content that looks intentional, not demo-like.
+7. Add recently viewed venues section when localStorage has recent venues.
+8. Add testimonials/reviews once real review data is stable.
+9. Add "How it works" compact 3-step section:
+   - Search.
+   - Book.
+   - Play.
+10. Add trust/safety mini-section:
+   - Verified venues.
+   - Secure payments.
+   - Booking support.
+
+======================================================================
+4. VENUE DISCOVERY PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Let users browse and filter venues.
+
+Current layout:
+- Hero/banner with title and search.
+- Sport quick chips.
+- Left filter sidebar on desktop.
+- Main venue list on the right.
+- Venue cards are horizontal on larger screens.
+
+Current filters:
+- Search term.
+- Sport.
+- Price range.
+- Location / nearby search.
+- Radius when location is set.
+- Sort by distance, price, rating, name.
+
+Strengths:
+- Strong practical filtering foundation.
+- Active filter chips are shown.
+- Clear filters action exists.
+- No-result state is useful.
+- Venue cards have image, city, rating, sports, contact, and Book Now.
+
+Gaps:
+- On mobile, filters are still a large inline/sidebar-style experience rather than a true drawer.
+- Sort by distance can be confusing without location.
+- Map/list split view is not implemented.
+- Contact fields can make cards dense.
+
+Improvement ideas:
+- Convert filters into a mobile drawer.
+- Add view toggle:
+  - Grid.
+  - List.
+  - Map split when Mapbox token exists.
+- Add recommended venues when search returns no exact match.
+- Add sticky filter bar on mobile.
+- Add "open now" or "available today" once availability search is integrated.
+
+======================================================================
+5. VENUE DETAIL / BOOKING PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Show venue details and allow users to select sport, court, date, time, and pay/book.
+
+Current layout:
+- Venue image/gallery.
+- Venue details and map/address panel.
+- Booking panel with sport, court, time, notes, discount code, and payment modal.
+- Mobile sticky booking CTA is present after selecting a court.
+
+Strengths:
+- Booking path is visible on the venue page.
+- Courts and slots are selectable.
+- Multi-court support is visible.
+- Empty slot state now explains what to do.
+- Map fallback does not break if Mapbox is missing.
+- Guest checkout flow exists.
+
+Gaps:
+- Booking widget is still visually dense.
+- It is not fully presented as a stepper.
+- Policies, reviews, related venues, and trust content could be more prominent.
+- Payment unavailable state depends on Stripe config and may feel abrupt.
+
+Improvement ideas:
+- Convert booking panel into a clearer 3-step flow:
+  1. Choose sport and court.
+  2. Pick date and time.
+  3. Review and pay.
+- Add sticky desktop booking summary.
+- Add review summary near venue title.
+- Add "What is included" amenity section.
+- Add cancellation/refund policy box.
+- Add related venues section.
+- Add share button with copied link feedback.
+
+======================================================================
+6. EVENTS PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Let users browse and register for sports events.
+
+Current layout:
+- Page title and subtitle.
+- Search card.
+- Filters:
+  - sport,
+  - city,
+  - free/paid,
+  - clear filters.
+- Grid/list toggle.
+- Event cards with image, date badge, title, host, time, location, price, sport, spots left, and Register now.
+
+Strengths:
+- Filters are now functional.
+- Event cards communicate key details.
+- Fallback demo events prevent empty page feeling.
+- Free/paid state is clear.
+
+Gaps:
+- List mode still uses similar card content, not a truly optimized list layout.
+- Date range filter is missing.
+- Event type filter is not fully exposed.
+- Featured events carousel is not implemented.
+
+Improvement ideas:
+- Add event type filter:
+  - Tournament.
+  - Social.
+  - Training.
+  - League.
+- Add date range filter.
+- Add featured events row.
+- Make list view denser and more table-like.
+- Add capacity progress bar.
+- Add "registration closes" line.
+
+======================================================================
+7. EVENT DETAIL PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Show full event details and allow registration.
+
+Current UI:
+- Detail page exists.
+- Hero/image area exists.
+- Event metadata like date/time/location/price/participants is shown.
+- Map fallback is handled if Mapbox is unavailable.
+- Registration modal exists.
+
+Strengths:
+- Event registration path exists.
+- Event metadata is visually separated.
+- SEO metadata has been added.
+
+Gaps:
+- Hero could be more immersive.
+- Related events are not prominent.
+- Organizer card could be richer.
+- Rules, requirements, prizes, and refund/cancellation policy could be organized into tabs/sections.
+
+Improvement ideas:
+- Add structured detail sections:
+  - Overview.
+  - Schedule.
+  - Venue/location.
+  - Rules.
+  - Requirements.
+  - Prizes.
+  - Cancellation/refund.
+- Add organizer/contact card.
+- Add participant count progress.
+- Add related events.
+
+======================================================================
+8. SPORTS PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Let users browse sports categories and jump into filtered venue discovery.
+
+Current layout:
+- Dark hero.
+- Search input.
+- Category segmented buttons:
+  - All Sports.
+  - Team.
+  - Racquet.
+  - Fitness.
+  - Water.
+- Sports grid.
+- Popular sports section.
+
+Strengths:
+- Clear sport-first navigation.
+- Simple and scannable.
+- Venue count adds context.
+- Good entry point for users who know the sport but not the venue.
+
+Gaps:
+- Images may be repeated or generic.
+- Sport detail pages do not exist yet.
+- Category mapping is static.
+
+Improvement ideas:
+- Add unique realistic images per sport.
+- Add sport landing pages.
+- Add "available near you" counts.
+- Add trending/popular badges.
+- Add suggested events per sport.
+
+======================================================================
+9. LOGIN, REGISTER, AND AUTH UI/UX
+======================================================================
+
+Login page:
+- Centered auth card.
+- Logo/SM mark.
+- Email and password fields.
+- Password visibility toggle.
+- Remember me checkbox.
+- Forgot password link.
+- Social login section exists.
+- Local demo access helper exists with Admin, Owner, Player fill buttons.
+- Inline error alert exists.
+
+Strengths:
+- Demo credential helper is useful locally.
+- Inline error prevents "nothing happened" feeling.
+- Password toggle improves usability.
+- Auth form is simple.
+
+Gaps:
+- Demo helper should be hidden in production.
+- Forgot password flow may need full UX verification.
+- Social login depends on OAuth configuration.
+- Benefits panel for player vs owner is not present.
+
+Improvement ideas:
+- Add split benefits panel:
+  - Players: book venues, join events, manage bookings.
+  - Owners: list venues, manage courts, track revenue.
+- Hide local demo credentials outside local/demo mode.
+- Add clearer loading/disabled state.
+- Add role-based post-login message.
+
+Register pages:
+- Player and venue owner registration routes exist.
+- Venue registration route exists.
+
+Improvement ideas:
+- Make role selection clearer.
+- Add onboarding steps after venue owner registration.
+- Show progress/next actions.
+
+======================================================================
+10. PROFILE PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Show account information and preferences.
+
+Current layout:
+- Page header.
+- Left profile summary card.
+- Right account information card.
+- Fields:
+  - first name,
+  - last name,
+  - email,
+  - phone,
+  - city,
+  - state,
+  - member since.
+- Buttons:
+  - Edit Profile.
+  - Change Password.
+
+Strengths:
+- Clear read-only profile information layout.
+- Icons help scan fields.
+- Layout works as a simple account overview.
+
+Gaps:
+- Edit Profile button is not yet an editable form experience.
+- Change Password button is visible but not wired here.
+- No profile picture upload.
+- No player preferences section.
+- No venue owner business profile section.
+
+Improvement ideas:
+- Convert to tabbed profile:
+  - Account.
+  - Security.
+  - Player preferences.
+  - Business profile for venue owners.
+- Add editable form state.
+- Add avatar upload.
+- Add favorite sports and skill level.
+- Add notification preferences.
+- Add save/cancel button states.
+
+======================================================================
+11. PLAYER DASHBOARD UI/UX
+======================================================================
+
+Current purpose:
+- Give players a private home for bookings, stats, and quick actions.
+
+Current layout:
+- Header with welcome copy.
+- Stats cards:
+  - total bookings,
+  - venues visited,
+  - events joined,
+  - total spent.
+- Quick actions:
+  - Book a Venue.
+  - Join an Event.
+  - View Bookings.
+- Next booking card appears when relevant.
+- Recent bookings list.
+- Empty state recommends venues.
+
+Strengths:
+- Good dashboard starting point.
+- Useful quick actions.
+- Empty state does not feel dead.
+- Next booking card adds relevance.
+
+Gaps:
+- Stats depend on backend report data.
+- No favorites/recently viewed display yet.
+- No event participation card.
+- No cancellation/rebook/review timeline.
+
+Improvement ideas:
+- Add tabs:
+  - Upcoming.
+  - Past.
+  - Events.
+  - Reviews.
+- Add recently viewed venues.
+- Add recommended venues based on favorite sports.
+- Add booking timeline.
+- Add rebook action.
+- Add receipt/download action.
+
+======================================================================
+12. PLAYER BOOKINGS PAGE UI/UX
+======================================================================
+
+Current purpose:
+- List user bookings and allow viewing details, cancellation, and review when available.
+
+Current layout:
+- Page header.
+- Loading state.
+- Error state.
+- Empty state with Browse Venues CTA.
+- Booking cards with venue name, location, date, time, status, duration, players, total, and actions.
+
+Strengths:
+- Booking cards are readable.
+- Status chip is clear.
+- Browse Venues empty state is useful.
+
+Gaps:
+- Cancel button does not visibly open a cancellation flow here.
+- Review button depends on eligibility but needs full UX.
+- No filters by status/date.
+- No receipt/payment status shown in list.
+
+Improvement ideas:
+- Add filters:
+  - Upcoming.
+  - Past.
+  - Cancelled.
+  - Payment status.
+- Add cancellation modal.
+- Add review modal.
+- Add receipt link.
+- Add rebook action.
+
+======================================================================
+13. VENUE OWNER DASHBOARD UI/UX
+======================================================================
+
+Current purpose:
+- Give venue owners an operations dashboard.
+
+Current layout:
+- Header with owner dashboard title.
+- Stats:
+  - total venues,
+  - total bookings,
+  - total revenue,
+  - average rating.
+- Quick actions:
+  - Create New Venue.
+  - Manage Venues.
+  - View Bookings.
+  - Analytics.
+- My Venues card with mini booking trend.
+- Venue setup checklist.
+- Upcoming bookings for today/tomorrow.
+- Recent reviews.
+- Additional cards for analytics/settings.
+
+Strengths:
+- Strong operational overview.
+- Setup checklist supports onboarding.
+- Quick actions are useful.
+- Recent reviews and upcoming bookings help owners act.
+
+Gaps:
+- Some secondary buttons are not fully wired.
+- Analytics points to bookings rather than a dedicated owner analytics page.
+- Settings card is not fully connected.
+- Venue setup checklist could be more precise with true data from courts/photos/approval.
+
+Improvement ideas:
+- Add owner analytics route.
+- Add settings route for owner preferences.
+- Add booking action buttons:
+  - contact customer,
+  - mark completed,
+  - cancel,
+  - export.
+- Add venue approval status action.
+- Add revenue period selector.
+
+======================================================================
+14. VENUE OWNER VENUES PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Let venue owners manage their venue portfolio.
+
+Current layout:
+- Header with Create New Venue CTA.
+- Stats:
+  - total venues,
+  - approved venues,
+  - average rating,
+  - total revenue.
+- Empty state with Create Your First Venue CTA.
+- Venue cards with name, ID, location, status, sports, rating, courts, and actions:
+  - View.
+  - Edit.
+  - Delete.
+
+Strengths:
+- Good portfolio overview.
+- Status is visible.
+- Venue cards give useful summary.
+
+Gaps:
+- Delete is visually present; needs safer confirmation UX beyond browser confirm.
+- No filters by status.
+- No onboarding completeness score per venue.
+- No image preview on cards.
+
+Improvement ideas:
+- Add image thumbnail.
+- Add status filter.
+- Add completeness checklist:
+  - courts,
+  - photos,
+  - availability,
+  - pricing,
+  - policy.
+- Replace browser confirm with custom modal.
+- Add "Preview public page."
+
+======================================================================
+15. VENUE OWNER BOOKINGS PAGE UI/UX
+======================================================================
+
+Current purpose:
+- Let venue owners manage bookings across their venues.
+
+Current layout:
+- Header.
+- Stats:
+  - total bookings,
+  - confirmed,
+  - total revenue,
+  - unique customers.
+- Filters:
+  - status,
+  - search,
+  - date,
+  - clear.
+- Empty state.
+- Booking cards with venue, customer, location, date/time, amount, duration, status, and View Details.
+
+Strengths:
+- Operationally useful.
+- Filters exist.
+- Cards are information-rich.
+
+Gaps:
+- Some older blue UI classes remain.
+- Search depends on backend behavior.
+- No bulk actions.
+- No calendar view.
+- No export button.
+
+Improvement ideas:
+- Add calendar/day view.
+- Add export CSV.
+- Add booking action buttons.
+- Add customer contact action.
+- Add payment status.
+- Add better responsive stacked layout.
+
+======================================================================
+16. ADMIN DASHBOARD AND ADMIN LAYOUT UI/UX
+======================================================================
+
+Current purpose:
+- Give admin control over users, venues, bookings, events, payments, reviews, discounts, reports, settings, and social keys.
+
+Admin layout:
+- Dedicated admin sidebar.
+- Desktop fixed sidebar.
+- Mobile sidebar overlay.
+- Nested menu groups:
+  - Users.
+  - Venues.
+  - Events.
+  - Master data.
+- Top bar has notifications and profile dropdown.
+
+Admin dashboard:
+- Main stats:
+  - total users,
+  - total venues,
+  - total bookings,
+  - total revenue.
+- Quick stats:
+  - venue owners,
+  - pending bookings,
+  - average rating,
+  - total events.
+- Revenue trend chart.
+- Recent activity.
+- Top performing venues table.
+
+Strengths:
+- Admin has a separate operational experience.
+- Sidebar structure is understandable.
+- Dashboard includes both metrics and lists.
+- Top venues table is useful.
+
+Gaps:
+- Admin styling still uses older blue in sidebar and some controls.
+- Revenue chart is simple and may not reflect real data.
+- Recent activity depends on backend activity data.
+- Notifications icon is not deeply functional.
+- Admin tables need consistent filters, pagination, row actions, and modals.
+
+Improvement ideas:
+- Replace admin sidebar active blue with #2eaf57.
+- Add dashboard setup checklist if stats are empty.
+- Add quick links:
+  - Pending venues.
+  - Pending reviews.
+  - Failed payments.
+  - Upcoming events.
+- Add admin notification drawer.
+- Add consistent confirmation modals.
+- Add table density controls.
+
+======================================================================
+17. CONTENT AND POLICY PAGES UI/UX
+======================================================================
+
+Current pages:
+- FAQ.
+- Terms.
+- Privacy.
+- Cookies.
+- Support.
+- Cancellation Policy.
+- Refund Policy.
+- Venue Owner Guide.
+
+Current behavior:
+- Content comes from site settings when available.
+- Fallback content prevents blank pages.
+- Pages use simple centered content layout.
+
+Strengths:
+- Important policy routes exist.
+- Fallbacks prevent empty pages.
+- Good foundation for production content.
+
+Gaps:
+- Content pages are visually plain.
+- No support form.
+- No table of contents.
+
+Improvement ideas:
+- Add content page sidebar/table of contents.
+- Add Support contact form.
+- Add FAQ accordion.
+- Add venue owner guide steps.
+
+======================================================================
+18. MOBILE UI/UX
+======================================================================
+
+Current strengths:
+- Header has mobile menu.
+- Homepage uses responsive grids.
+- Venue detail has sticky mobile booking CTA.
+- Cards stack on smaller screens.
+- Payment modal has constrained height.
+
+Current gaps:
+- Venue listing filters need drawer behavior.
+- Admin is still desktop-first.
+- Some booking cards may feel dense on mobile.
+- Tables in admin may need stacked mobile variants.
+
+Recommended mobile improvements:
+- Add mobile filter drawer on Venues and Events.
+- Add sticky bottom CTA on Event detail.
+- Add compact booking cards.
+- Avoid multi-column card stats where text may wrap awkwardly.
+- Test common flows at 375px and 430px widths.
+
+======================================================================
+19. CURRENT UI/UX STRENGTHS SUMMARY
+======================================================================
+
+Strong areas:
+- Homepage has clear marketplace structure.
+- Venue discovery is functional and filterable.
+- Venue booking flow is visible and improved.
+- Events page now has functional filters.
+- Sports page is a good sport-first discovery route.
+- Login page has visible demo helper and inline errors.
+- Player dashboard has useful starting structure.
+- Venue owner dashboard has setup checklist and operational stats.
+- Admin layout is separated from public layout.
+- Static content routes exist and do not look blank.
+
+======================================================================
+20. CURRENT UI/UX WEAKNESSES SUMMARY
+======================================================================
+
+Main gaps:
+- Some screens still feel older than the newest homepage/venue/event pages.
+- Profile page is read-only and buttons are not fully functional.
+- Admin sidebar and several admin/owner pages still use old blue styling.
+- Venue filters need a better mobile drawer.
+- Booking flow needs clearer stepper presentation.
+- Event detail needs richer structure.
+- Public content pages are plain.
+- Several action buttons need full modal/workflow behavior.
+- Real production trust elements are not fully visible yet.
+
+======================================================================
+21. RECOMMENDED NEXT UI/UX IMPROVEMENT ORDER
+======================================================================
+
+Recommended order:
+1. Finish green theme consistency across admin, owner, and remaining blue screens.
+2. Improve homepage with:
+   - curated imagery,
+   - how-it-works section,
+   - stronger venue owner CTA,
+   - card CTAs,
+   - recently viewed venues.
+3. Convert venue booking widget into clear 3-step flow.
+4. Add mobile filter drawer on venue and event listings.
+5. Upgrade profile page into editable tabbed account settings.
+6. Improve player bookings with filters, receipt, rebook, cancel, and review flows.
+7. Improve venue owner booking management actions.
+8. Polish event detail page with organizer card, capacity progress, policies, and related events.
+9. Standardize admin tables, filters, status chips, and modals.
+10. Add richer FAQ/support/guide content layouts.
+
+======================================================================
+22. HOMEPAGE DETAILED IMPROVEMENT BLUEPRINT
+======================================================================
+
+Recommended improved homepage structure:
+
+Section 1: Header
+- Keep sticky header.
+- Keep primary nav simple.
+- Add refined active/hover state.
+- Keep "List Your Venue" visible.
+
+Section 2: Hero
+- Use high-quality real sports venue image.
+- Headline:
+  "Book Courts, Join Events, and Play More"
+- Supporting copy:
+  "Find verified sports venues, compare courts, and reserve your next session in minutes."
+- Add benefit chips:
+  - Verified venues.
+  - Secure booking.
+  - Local events.
+
+Section 3: Search
+- City/area input.
+- Sport selector.
+- Date selector.
+- Primary CTA: Find Venues.
+- Secondary CTA: Explore Events.
+- Quick chips:
+  - Near me.
+  - Tennis.
+  - Badminton.
+  - Football.
+  - Cricket.
+  - Basketball.
+
+Section 4: Trust Stats
+- Venues.
+- Courts.
+- Events.
+- Sports.
+- Verified venues.
+
+Section 5: How It Works
+- Step 1: Search by city or sport.
+- Step 2: Choose court, date, and time.
+- Step 3: Book and play.
+
+Section 6: Featured Venues
+- 6 to 8 venue cards.
+- Show image, name, city, rating, verified badge, sport tags, starting price, court count.
+- CTA: View & Book.
+
+Section 7: Popular Sports
+- 8 to 12 sports.
+- Unique image per sport.
+- Venue count.
+- CTA: Find venues.
+
+Section 8: Upcoming Events
+- 4 to 6 event cards.
+- Date badge.
+- Event type.
+- Sport.
+- City.
+- Price/free badge.
+- Spots left.
+- CTA: Register.
+
+Section 9: Recently Viewed Venues
+- Show only if user has local recently viewed venues.
+- Useful for returning visitors.
+
+Section 10: Venue Owner CTA
+- Headline:
+  "Run your sports venue online"
+- Benefits:
+  - Add courts and pricing.
+  - Accept online bookings.
+  - Track revenue and reviews.
+- CTA:
+  - Start listing.
+  - Read venue owner guide.
+
+Section 11: Reviews / Trust
+- Show user reviews once real review data is stable.
+- Include verified badge and rating summary.
+
+Section 12: Who We Are
+- Short mission statement.
+- Three columns:
+  - Players.
+  - Venue owners.
+  - Event organizers.
+
+Section 13: Footer
+- Product links.
+- Support links.
+- Policy links.
+- Venue owner links.
+- Contact/social.
+
+Homepage design rules:
+- No blank sections.
+- No "Unable to load" as primary visual content.
+- Every card should have an image or intentional fallback.
+- Primary CTAs should use #2eaf57.
+- Keep cards to rounded-md / small radius.
+- Avoid heavy decorative gradients.
+- Use real sports images wherever possible.
+- Keep mobile search easy to use.
+
+======================================================================
+23. FINAL UI/UX CONCLUSION
+======================================================================
+
+SportMeet currently has the core UI structure of a real marketplace:
+- Public discovery.
+- Venue booking.
+- Event browsing.
+- Sport category browsing.
+- Player account area.
+- Venue owner operations.
+- Admin operations.
+
+The strongest UI/UX path forward is not to rebuild everything at once.
+The better path is:
+1. Make the homepage more conversion-focused and image-rich.
+2. Make venue booking easier to understand as a step-by-step flow.
+3. Make mobile listing filters drawer-based.
+4. Make profile and dashboard actions actually editable/actionable.
+5. Polish owner/admin operational screens with consistent green theme and reliable modals.
+6. Add richer trust, policy, review, and support content.
+
+Once these UI/UX improvements are completed, SportMeet will feel less like a continued discontinued project and more like a cohesive sports booking product ready for staging and production refinement.

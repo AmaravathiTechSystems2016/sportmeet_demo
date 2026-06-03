@@ -6,6 +6,7 @@ import LoadingSpinner from '../components/UI/LoadingSpinner';
 import Button from '../components/UI/Button';
 import Card from '../components/UI/Card';
 import EventBookingModal from '../components/EventBookingModal';
+import PageMeta from '../components/SEO/PageMeta';
 import mapboxgl from 'mapbox-gl';
 import { 
   Calendar, 
@@ -195,7 +196,13 @@ const EventDetailPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F7FAF8]">
+      <PageMeta
+        title={event?.title || 'Sports Event'}
+        description={event?.description || 'View event details, location, registration status, pricing, and spots left.'}
+        image={event?.cover_image_url || event?.cover_image || undefined}
+        type="event"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -213,20 +220,36 @@ const EventDetailPage = () => {
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
             {/* Event Image */}
-            <Card className="p-0 overflow-hidden">
-              <div className="h-64 bg-gradient-to-br from-green-400 to-green-600 flex items-center justify-center">
+            <Card className="p-0 overflow-hidden rounded-3xl">
+              <div className="relative h-80 bg-slate-900">
                 {event.cover_image_url || event.cover_image ? (
                   <img
                     src={mediaUrl(event.cover_image_url || event.cover_image)}
                     alt={event.title}
-                    className="w-full h-full object-cover"
+                    className="h-full w-full object-cover"
                   />
                 ) : (
-                  <div className="text-white text-center">
+                  <div className="flex h-full items-center justify-center text-center text-white">
                     <Calendar className="w-16 h-16 mx-auto mb-4" />
                     <span className="text-lg font-semibold">Event Image</span>
                   </div>
                 )}
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                  <div className="mb-3 flex flex-wrap gap-2">
+                    <span className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${getEventTypeColor(event.event_type)}`}>
+                      {event.event_type || 'Event'}
+                    </span>
+                    <span className="rounded-full bg-white/15 px-3 py-1 text-xs font-bold ring-1 ring-white/20">
+                      {event.sport_category || 'Sport'}
+                    </span>
+                  </div>
+                  <h1 className="max-w-3xl text-3xl font-extrabold md:text-4xl">{event.title}</h1>
+                  <p className="mt-2 flex items-center gap-2 text-sm text-slate-200">
+                    <MapPin className="h-4 w-4" />
+                    {event.venue_name}{(event.city || event.state) ? `, ${event.city || ''}${event.state ? ` ${event.state}` : ''}` : ''}
+                  </p>
+                </div>
               </div>
             </Card>
 

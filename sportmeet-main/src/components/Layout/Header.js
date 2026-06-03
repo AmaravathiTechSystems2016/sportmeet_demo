@@ -24,9 +24,11 @@ const Header = () => {
 
   const publicNavigation = [
     { name: 'Home', href: '/' },
+    { name: 'How it Works', href: '/#how-it-works' },
     { name: 'Venues', href: '/venues' },
     { name: 'Events', href: '/events' },
     { name: 'Sports', href: '/sports' },
+    { name: 'Support', href: '/support' },
   ];
 
   const accountNavigation = [
@@ -43,9 +45,10 @@ const Header = () => {
     accountNavigation.unshift({ name: 'Admin', href: '/admin', icon: ShieldCheck });
   }
 
-  const isActive = (href) => (
-    href === '/' ? location.pathname === '/' : location.pathname.startsWith(href)
-  );
+  const isActive = (href) => {
+    if (href.includes('#')) return location.pathname === '/' && location.hash === href.slice(1);
+    return href === '/' ? location.pathname === '/' : location.pathname.startsWith(href);
+  };
 
   const handleLogout = () => {
     logout();

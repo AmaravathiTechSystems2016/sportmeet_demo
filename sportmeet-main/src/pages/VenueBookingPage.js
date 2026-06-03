@@ -10,6 +10,7 @@ import PaymentForm from '../components/Payment/PaymentForm';
 import ReviewForm from '../components/ReviewForm';
 import DiscountCodeInput from '../components/Discount/DiscountCodeInput';
 import ImageSlider from '../components/ImageSlider';
+import PageMeta from '../components/SEO/PageMeta';
 import {
   MapPin,
   Phone,
@@ -20,7 +21,13 @@ import {
   CheckCircle,
   AlertCircle,
   X,
-  Share2
+  Share2,
+  CalendarDays,
+  Clock,
+  CreditCard,
+  Dumbbell,
+  Map,
+  ShieldCheck
 } from 'lucide-react';
 import mapboxgl from 'mapbox-gl';
 import toast from 'react-hot-toast';
@@ -50,6 +57,13 @@ const VenueBookingPage = () => {
   const mapInstanceRef = useRef(null);
   const markerRef = useRef(null);
   const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN || '';
+  const API_ORIGIN = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '');
+  const mediaUrl = (url) => {
+    if (!url) return null;
+    if (/^https?:\/\//i.test(url)) return url;
+    return `${API_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+  };
+  const fallbackVenueImage = `${API_ORIGIN}/media/demo/generated-venue.png`;
 
   const { data: venueData, isLoading: venueLoading } = useQuery(
     ['venue', id],
@@ -86,6 +100,21 @@ const VenueBookingPage = () => {
   const windows = Array.isArray(availabilityData?.data?.availability)
     ? availabilityData.data.availability
     : [];
+
+  useEffect(() => {
+    if (!venue?.id) return;
+    const key = 'sportmeet_recent_venues';
+    const current = JSON.parse(localStorage.getItem(key) || '[]');
+    const entry = {
+      id: venue.id,
+      name: venue.name,
+      city: venue.city,
+      image: venue.cover_image_url,
+      viewed_at: new Date().toISOString(),
+    };
+    const next = [entry, ...current.filter((item) => item.id !== venue.id)].slice(0, 8);
+    localStorage.setItem(key, JSON.stringify(next));
+  }, [venue?.id, venue?.name, venue?.city, venue?.cover_image_url]);
 
   // Get available sports from venue
   const getAvailableSports = useCallback(() => {
@@ -459,6 +488,18 @@ const VenueBookingPage = () => {
       day: 'numeric'
     });
   };
+
+  const bookingSteps = [
+    { label: 'Sport', icon: Dumbbell, done: Boolean(selectedSport) },
+    { label: 'Court', icon: Map, done: Boolean(selectedCourt) },
+    { label: 'Time', icon: Clock, done: selectedTimeSlots.length > 0 },
+    { label: 'Details', icon: CalendarDays, done: Boolean(selectedCourt && selectedTimeSlots.length > 0) },
+    { label: 'Payment', icon: CreditCard, done: false },
+  ];
+
+  const selectedCourtNames = selectedCourts && selectedCourts.length > 0
+    ? selectedCourts.map((court) => court.name).join(', ')
+    : selectedCourt?.name || 'Choose a court';
   // Initialize map when venue data is loaded
   useEffect(() => {
     if (MAPBOX_TOKEN && venue && mapRef.current && !mapInstanceRef.current) {
@@ -511,7 +552,13 @@ const VenueBookingPage = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F7FAF8]">
+      <PageMeta
+        title={venue?.name || 'Venue Booking'}
+        description={venue?.description || 'View venue details, courts, availability, pricing, and book sports courts online.'}
+        image={venue?.cover_image_url || undefined}
+        type="place"
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Back Button */}
         <Button
@@ -522,6 +569,62 @@ const VenueBookingPage = () => {
           <ChevronLeft className="w-4 h-4" />
           <span>Back to Venues</span>
         </Button>
+
+        <section className="mb-8 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+          <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
+            <div className="relative min-h-[320px]">
+              <img
+                src={mediaUrl(venue.cover_image_url) || mediaUrl(venue.gallery_images?.[0]?.image) || fallbackVenueImage}
+                alt={venue.name}
+                className="absolute inset-0 h-full w-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/30 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
+                <div className="mb-3 flex flex-wrap gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold ring-1 ring-white/20">
+                    <ShieldCheck className="h-3.5 w-3.5" />
+                    Verified venue
+                  </span>
+                  {venue.average_rating && (
+                    <span className="inline-flex items-center gap-1 rounded-full bg-white/15 px-3 py-1 text-xs font-bold ring-1 ring-white/20">
+                      <Star className="h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
+                      {venue.average_rating}
+                    </span>
+                  )}
+                </div>
+                <h1 className="max-w-3xl text-3xl font-extrabold md:text-4xl">{venue.name}</h1>
+                <p className="mt-2 flex items-center gap-2 text-sm text-slate-200">
+                  <MapPin className="h-4 w-4" />
+                  {venue.address}, {venue.city}, {venue.state} {venue.postcode}
+                </p>
+              </div>
+            </div>
+            <div className="p-6 lg:p-8">
+              <p className="text-sm font-bold uppercase tracking-wide text-primary-700">Booking flow</p>
+              <h2 className="mt-2 text-2xl font-extrabold text-slate-950">Choose your court and time</h2>
+              <p className="mt-2 text-sm leading-6 text-slate-600">
+                Select a sport, one or more courts, adjacent time slots, then confirm payment.
+              </p>
+              <div className="mt-6 grid gap-3">
+                {bookingSteps.map((step, index) => {
+                  const Icon = step.icon;
+                  const active = !step.done && bookingSteps.slice(0, index).every((item) => item.done);
+                  return (
+                    <div key={step.label} className={`flex items-center gap-3 rounded-2xl border px-4 py-3 ${step.done ? 'border-primary-200 bg-primary-50' : active ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50'}`}>
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-xl ${step.done ? 'bg-primary-500 text-white' : active ? 'bg-slate-950 text-white' : 'bg-white text-slate-400'}`}>
+                        {step.done ? <CheckCircle className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
+                      </div>
+                      <div>
+                        <p className="text-sm font-extrabold text-slate-950">{index + 1}. {step.label}</p>
+                        <p className="text-xs text-slate-500">{step.done ? 'Completed' : active ? 'Current step' : 'Pending'}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        </section>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Venue Information */}
@@ -694,8 +797,23 @@ const VenueBookingPage = () => {
 
           {/* Booking Form */}
           <div className="lg:col-span-2">
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-6">Book Your Session</h2>
+            <Card className="overflow-hidden">
+              <div className="border-b border-slate-100 bg-white p-6">
+                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div>
+                    <p className="text-sm font-bold uppercase tracking-wide text-primary-700">Reserve your slot</p>
+                    <h2 className="mt-1 text-2xl font-extrabold text-slate-950">Book Your Session</h2>
+                    <p className="mt-2 text-sm text-slate-600">Selections update the summary and payment amount automatically.</p>
+                  </div>
+                  <div className="rounded-2xl bg-slate-50 px-4 py-3 text-sm">
+                    <p className="font-bold text-slate-950">{selectedCourtNames}</p>
+                    <p className="mt-1 text-slate-500">
+                      {selectedTimeSlots.length > 0 ? `${selectedTimeSlots.length} selected slot(s)` : 'No time selected yet'}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="p-6">
 
               {/* Date Selection */}
               <div className="mb-6">
@@ -760,7 +878,7 @@ const VenueBookingPage = () => {
                         <h4 className="font-medium text-gray-900">{court.name}</h4>
                         <p className="text-sm text-gray-600">{court.sport}</p>
                         <p className="text-sm text-gray-600">
-                          {court.is_indoor ? 'Indoor' : 'Outdoor'} • Max {court.max_players} players
+                          {court.is_indoor ? 'Indoor' : 'Outdoor'} - Max {court.max_players} players
                         </p>
                         <p className="text-sm text-gray-600">Duration: {court.booking_duration_minutes || 60} min</p>
                         <p className="text-sm font-medium text-gray-900">${court.price_per_duration || 0}/slot</p>
@@ -819,7 +937,7 @@ const VenueBookingPage = () => {
                 <div className="mb-6">
                   <h3 className="text-lg font-medium text-gray-900 mb-4">Duration</h3>
                   <div className="text-lg font-medium text-gray-900">
-                    {selectedTimeSlots.length} × {selectedCourt?.booking_duration_minutes || 60} min
+                    {selectedTimeSlots.length} x {selectedCourt?.booking_duration_minutes || 60} min
                   </div>
                 </div>
               )}
@@ -874,12 +992,12 @@ const VenueBookingPage = () => {
                           {selectedCourts
                             .filter((c) => !selectedCourt || c.id !== selectedCourt.id)
                             .map((c) => (
-                              <li key={c.id}>{c.name} {c.sport ? `• ${c.sport}` : ''} (${c.price_per_duration || 0}/slot)</li>
+                              <li key={c.id}>{c.name} {c.sport ? `- ${c.sport}` : ''} (${c.price_per_duration || 0}/slot)</li>
                             ))}
                         </ul>
                       </div>
                     )}
-                    <div className="flex justify-between"><span className="text-gray-600">Duration:</span><span className="text-gray-900">{selectedTimeSlots.length} × {selectedCourt?.booking_duration_minutes || 60} min</span></div>
+                    <div className="flex justify-between"><span className="text-gray-600">Duration:</span><span className="text-gray-900">{selectedTimeSlots.length} x {selectedCourt?.booking_duration_minutes || 60} min</span></div>
                     
                     {/* Discount Display */}
                     {appliedDiscount && (
@@ -968,10 +1086,33 @@ const VenueBookingPage = () => {
                   </div>
                 </div>
               )}
+              </div>
             </Card>
           </div>
         </div>
       </div>
+
+      {selectedCourt && (
+        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-gray-200 bg-white p-3 shadow-lg lg:hidden">
+          <div className="mx-auto flex max-w-7xl items-center gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-gray-900">{venue?.name}</p>
+              <p className="text-xs text-gray-600">
+                {selectedTimeSlots.length > 0
+                  ? `${selectedTimeSlots.length} slot(s) - $${calculateTotalPrice().toFixed(2)} ${venue?.currency || 'AUD'}`
+                  : 'Select a time slot to book'}
+              </p>
+            </div>
+            <Button
+              onClick={handleBookingSubmit}
+              disabled={selectedTimeSlots.length === 0 || isBooking}
+              className="shrink-0"
+            >
+              Book
+            </Button>
+          </div>
+        </div>
+      )}
 
       {/* Payment Modal */}
       {showPaymentModal && (
@@ -1004,7 +1145,7 @@ const VenueBookingPage = () => {
                   <div className="text-gray-600">Courts:</div>
                   <ul className="list-disc ml-5">
                     {selectedCourts.map((c) => (
-                      <li key={c.id} className="font-medium">{c.name}{c.sport ? ` • ${c.sport}` : ''} (${c.price_per_duration || 0}/slot)</li>
+                      <li key={c.id} className="font-medium">{c.name}{c.sport ? ` - ${c.sport}` : ''} (${c.price_per_duration || 0}/slot)</li>
                     ))}
                   </ul>
                 </div>

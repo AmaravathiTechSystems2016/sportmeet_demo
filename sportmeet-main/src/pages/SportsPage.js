@@ -1,9 +1,21 @@
 import React, { useMemo, useState } from 'react';
-import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
+import { useQuery } from 'react-query';
 import { venuesAPI } from '../services/api';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
-import { ArrowRight, Search, Sparkles } from 'lucide-react';
+import EmptyState from '../components/UI/EmptyState';
+import { SkeletonCardGrid } from '../components/UI/Skeleton';
+import PageMeta from '../components/SEO/PageMeta';
+import {
+  ArrowRight,
+  CalendarDays,
+  Dumbbell,
+  MapPin,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Trophy,
+  Users,
+} from 'lucide-react';
 
 const API_ORIGIN = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '');
 const fallbackSportImage = `${API_ORIGIN}/media/demo/generated-sports.png`;
@@ -24,7 +36,6 @@ const fallbackSports = [
 ].map((name, index) => ({
   id: `fallback-${name}`,
   name,
-  color: ['#2eaf57', '#16A34A', '#F97316', '#0F766E', '#DC2626', '#0891B2'][index % 6],
   image_url: fallbackSportImage,
   venue_count: index + 2,
 }));
@@ -44,11 +55,11 @@ const categoryMap = {
 };
 
 const categories = [
-  { key: 'all', label: 'All Sports' },
-  { key: 'team', label: 'Team' },
-  { key: 'racquet', label: 'Racquet' },
-  { key: 'fitness', label: 'Fitness' },
-  { key: 'water', label: 'Water' },
+  { key: 'all', label: 'All Sports', icon: Sparkles },
+  { key: 'team', label: 'Team', icon: Users },
+  { key: 'racquet', label: 'Racquet', icon: Trophy },
+  { key: 'fitness', label: 'Fitness', icon: Dumbbell },
+  { key: 'water', label: 'Water', icon: ShieldCheck },
 ];
 
 const SportsPage = () => {
@@ -71,102 +82,142 @@ const SportsPage = () => {
     .sort((a, b) => Number(b.venue_count || 0) - Number(a.venue_count || 0))
     .slice(0, 8);
 
-  if (isLoading && sports.length === 0) {
-    return (
-      <div className="flex h-64 items-center justify-center">
-        <LoadingSpinner size="lg" />
-      </div>
-    );
-  }
-
   return (
-    <div className="min-h-screen bg-gray-50">
-      <section className="bg-gray-950 py-14 text-white">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-[#F7FAF8]">
+      <PageMeta
+        title="Sports Categories"
+        description="Browse SportMeet sports categories and find venues for badminton, football, tennis, cricket, basketball, and more."
+      />
+
+      <section className="relative overflow-hidden bg-slate-950 text-white">
+        <div className="absolute inset-0">
+          <img src={fallbackSportImage} alt="Sports categories" className="h-full w-full object-cover opacity-30" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/90 to-slate-950/50" />
+        </div>
+        <div className="relative mx-auto max-w-7xl px-4 py-14 sm:px-6 lg:px-8">
           <div className="max-w-3xl">
-            <p className="mb-3 inline-flex items-center gap-2 rounded-md bg-white/10 px-3 py-1 text-sm font-medium text-green-200">
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-lime-200">
               <Sparkles className="h-4 w-4" />
               Choose a sport and start with venues
             </p>
-            <h1 className="text-4xl font-bold sm:text-5xl">Explore Sports</h1>
-            <p className="mt-4 text-lg text-gray-300">
-              Browse categories, compare available venues, and jump straight into booking.
+            <h1 className="text-4xl font-extrabold sm:text-5xl">Explore sports on SportMeet</h1>
+            <p className="mt-4 text-lg leading-8 text-slate-300">
+              Browse sports categories, find venues with available courts, and jump directly into booking or event discovery.
             </p>
             <div className="relative mt-8 max-w-2xl">
-              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+              <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search sports"
+                placeholder="Search badminton, cricket, football..."
                 value={searchTerm}
                 onChange={(event) => setSearchTerm(event.target.value)}
-                className="h-12 w-full rounded-md border border-white/10 bg-white pl-11 pr-4 text-gray-950 outline-none focus:border-green-500"
+                className="h-12 w-full rounded-xl border border-white/10 bg-white pl-11 pr-4 text-slate-950 outline-none focus:border-primary-500"
               />
             </div>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-        <div className="mb-8 flex flex-wrap gap-2">
-          {categories.map((category) => (
-            <button
-              key={category.key}
-              type="button"
-              onClick={() => setSelectedCategory(category.key)}
-              className={`rounded-md px-4 py-2 text-sm font-semibold ${
-                selectedCategory === category.key
-                  ? 'bg-primary-500 text-white'
-                  : 'border border-gray-200 bg-white text-gray-700 hover:bg-gray-100'
-              }`}
-            >
-              {category.label}
-            </button>
+      <main className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+        <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+          {categories.map((category) => {
+            const Icon = category.icon;
+            const active = selectedCategory === category.key;
+            return (
+              <button
+                key={category.key}
+                type="button"
+                onClick={() => setSelectedCategory(category.key)}
+                className={`rounded-2xl border p-4 text-left transition ${
+                  active
+                    ? 'border-primary-500 bg-primary-500 text-white shadow-lg'
+                    : 'border-slate-200 bg-white text-slate-800 shadow-sm hover:border-primary-200 hover:bg-primary-50'
+                }`}
+              >
+                <Icon className={`mb-4 h-6 w-6 ${active ? 'text-white' : 'text-primary-600'}`} />
+                <span className="block text-sm font-extrabold">{category.label}</span>
+                <span className={`mt-1 block text-xs ${active ? 'text-white/80' : 'text-slate-500'}`}>
+                  {sports.filter(categoryMap[category.key] || categoryMap.all).length} available
+                </span>
+              </button>
+            );
+          })}
+        </div>
+
+        <section>
+          <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-primary-700">Sports directory</p>
+              <h2 className="mt-1 text-3xl font-extrabold text-slate-950">Sports Categories</h2>
+              <p className="mt-2 text-sm text-slate-600">{filteredSports.length} categories match your selection.</p>
+            </div>
+            <Link to="/venues" className="inline-flex items-center gap-1 text-sm font-extrabold text-primary-700">
+              View all venues
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+
+          {isLoading ? (
+            <SkeletonCardGrid count={8} />
+          ) : filteredSports.length > 0 ? (
+            <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+              {filteredSports.map((sport) => <SportCard key={sport.id} sport={sport} />)}
+            </div>
+          ) : (
+            <EmptyState
+              icon={Search}
+              title="No sports found"
+              description="Clear search or category filters to browse all available sports."
+              action={(
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchTerm('');
+                    setSelectedCategory('all');
+                  }}
+                  className="btn btn-primary"
+                >
+                  Clear Filters
+                </button>
+              )}
+            />
+          )}
+        </section>
+
+        <section className="mt-14">
+          <div className="mb-6 flex items-end justify-between gap-4">
+            <div>
+              <p className="text-sm font-bold uppercase tracking-wide text-primary-700">Most active</p>
+              <h2 className="mt-1 text-2xl font-extrabold text-slate-950">Popular Sports</h2>
+            </div>
+            <Link to="/events" className="inline-flex items-center gap-1 text-sm font-extrabold text-primary-700">
+              Explore events
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+            {popularSports.map((sport) => <SportCard key={`popular-${sport.id}`} sport={sport} compact />)}
+          </div>
+        </section>
+
+        <section className="mt-14 grid gap-5 md:grid-cols-3">
+          {[
+            ['Find Venues', 'Search bookable courts by sport, city, date, and price.', MapPin, '/venues'],
+            ['Join Events', 'Discover tournaments, training, and social games.', CalendarDays, '/events'],
+            ['List a Sport Venue', 'Add your courts and accept online bookings.', ShieldCheck, '/register-venue-owner'],
+          ].map(([title, text, Icon, href]) => (
+            <Link key={title} to={href} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+              <Icon className="h-7 w-7 text-primary-600" />
+              <h3 className="mt-4 text-lg font-extrabold text-slate-950">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-slate-600">{text}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-extrabold text-primary-700">
+                Continue
+                <ArrowRight className="h-4 w-4" />
+              </span>
+            </Link>
           ))}
-        </div>
-
-        <div className="mb-6 flex items-end justify-between gap-4">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-950">Sports Categories</h2>
-            <p className="mt-1 text-sm text-gray-600">{filteredSports.length} categories available</p>
-          </div>
-          <Link to="/venues" className="inline-flex items-center gap-1 text-sm font-semibold text-primary-700">
-            View venues
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
-
-        {filteredSports.length > 0 ? (
-          <div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {filteredSports.map((sport) => (
-              <SportCard key={sport.id} sport={sport} />
-            ))}
-          </div>
-        ) : (
-          <div className="rounded-md border border-dashed border-gray-300 bg-white p-10 text-center">
-            <h3 className="text-lg font-semibold text-gray-950">No sports found</h3>
-            <p className="mt-2 text-sm text-gray-600">Clear the filters to browse every available sport.</p>
-            <button
-              type="button"
-              onClick={() => {
-                setSearchTerm('');
-                setSelectedCategory('all');
-              }}
-              className="mt-4 rounded-md bg-primary-500 px-4 py-2 text-sm font-semibold text-white"
-            >
-              Clear Filters
-            </button>
-          </div>
-        )}
-
-        <div className="mt-14">
-          <h2 className="text-2xl font-bold text-gray-950">Popular Sports</h2>
-          <div className="mt-5 grid grid-cols-2 gap-4 md:grid-cols-4">
-            {popularSports.map((sport) => (
-              <SportCard key={`popular-${sport.id}`} sport={sport} compact />
-            ))}
-          </div>
-        </div>
-      </section>
+        </section>
+      </main>
     </div>
   );
 };
@@ -174,22 +225,22 @@ const SportsPage = () => {
 const SportCard = ({ sport, compact = false }) => (
   <Link
     to={`/venues?sport_category=${encodeURIComponent(sport.name)}`}
-    className="group overflow-hidden rounded-md border border-gray-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+    className="group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
   >
-    <div className={compact ? 'relative h-28' : 'relative h-40'}>
+    <div className={compact ? 'relative h-32' : 'relative h-44'}>
       <img
         src={mediaUrl(sport.image_url) || fallbackSportImage}
         alt={sport.name}
         className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
       />
-      <div className="absolute inset-0 bg-gradient-to-t from-gray-950/75 to-transparent" />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent" />
       <div className="absolute bottom-3 left-3 right-3">
-        <h3 className="font-bold text-white">{sport.name}</h3>
+        <h3 className="font-extrabold text-white">{sport.name}</h3>
       </div>
     </div>
     <div className="flex items-center justify-between px-4 py-3">
-      <span className="text-sm text-gray-600">{sport.venue_count || 0} venues</span>
-      <span className="inline-flex items-center gap-1 text-sm font-semibold text-primary-700">
+      <span className="text-sm font-semibold text-slate-600">{sport.venue_count || 0} venues</span>
+      <span className="inline-flex items-center gap-1 text-sm font-extrabold text-primary-700">
         Find
         <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
       </span>

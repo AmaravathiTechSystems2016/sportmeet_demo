@@ -5,6 +5,7 @@ Django settings for sportmeet project.
 import os
 from pathlib import Path
 from decouple import Config, RepositoryEnv
+from corsheaders.defaults import default_headers, default_methods
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,12 +24,15 @@ DEBUG = config('DJANGO_DEBUG', default=config('DEBUG', default='True')).lower() 
     'on',
 )
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,16.50.106.43,api.belovedsoulmate.in,front.belovedsoulmate.in').split(',')
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in config('ALLOWED_HOSTS', default='localhost,127.0.0.1,16.50.106.43,api.belovedsoulmate.in,front.belovedsoulmate.in').split(',')
+    if host.strip()
+]
 CSRF_TRUSTED_ORIGINS = [
-    "https://front.belovedsoulmate.in",
-    # 'http://16.50.106.43:5000',
-    # 'http://localhost:5000',
-    # 'http://127.0.0.1:5000',
+    origin.strip()
+    for origin in config('CSRF_TRUSTED_ORIGINS', default='https://front.belovedsoulmate.in,http://16.50.106.43:5000,http://localhost:5000,http://127.0.0.1:5000').split(',')
+    if origin.strip()
 ]
 
 # Application definition
@@ -184,10 +188,9 @@ REST_FRAMEWORK = {
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = [
-    "https://front.belovedsoulmate.in",
-    # "http://16.50.106.43:5000",
-    # "http://localhost:5000",
-    # "http://127.0.0.1:5000",
+    origin.strip()
+    for origin in config('CORS_ALLOWED_ORIGINS', default='https://front.belovedsoulmate.in,http://16.50.106.43:5000,http://localhost:5000,http://127.0.0.1:5000').split(',')
+    if origin.strip()
 ]
 
 CORS_ALLOW_CREDENTIALS = False
@@ -195,23 +198,18 @@ CORS_ALLOW_CREDENTIALS = False
 # Allow all origins/headers/methods in development to avoid CORS blocks
 if DEBUG:
     CORS_ALLOW_ALL_ORIGINS = True
-    CORS_ALLOW_HEADERS = ['*']
-    CORS_ALLOW_METHODS = ['*']
 
 # Allow common headers from frontend
-CORS_ALLOW_HEADERS = list(os.environ.get('CORS_ALLOW_HEADERS', '').split(',')) or [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+configured_cors_headers = [
+    header.strip()
+    for header in os.environ.get('CORS_ALLOW_HEADERS', '').split(',')
+    if header.strip()
+]
+CORS_ALLOW_HEADERS = configured_cors_headers or list(default_headers) + [
     'cache-control',
     'pragma',
 ]
+CORS_ALLOW_METHODS = list(default_methods)
 
 # OAuth2 settings
 OAUTH2_PROVIDER = {

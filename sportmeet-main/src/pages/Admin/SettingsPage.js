@@ -37,7 +37,7 @@ const InlineHtmlEditor = ({ label, value, onChange, rows = 8 }) => {
         <button type="button" onClick={() => applyCmd('bold')} className="px-2 py-1 text-sm border rounded">B</button>
         <button type="button" onClick={() => applyCmd('italic')} className="px-2 py-1 text-sm border rounded italic">I</button>
         <button type="button" onClick={() => applyCmd('underline')} className="px-2 py-1 text-sm border rounded">U</button>
-        <button type="button" onClick={() => applyCmd('insertUnorderedList')} className="px-2 py-1 text-sm border rounded">• List</button>
+        <button type="button" onClick={() => applyCmd('insertUnorderedList')} className="px-2 py-1 text-sm border rounded">List</button>
         <button type="button" onClick={() => applyCmd('insertOrderedList')} className="px-2 py-1 text-sm border rounded">1. List</button>
         <button type="button" onClick={() => { const url = prompt('Enter URL'); if (url) applyCmd('createLink', url); }} className="px-2 py-1 text-sm border rounded">Link</button>
         <button type="button" onClick={() => applyCmd('removeFormat')} className="px-2 py-1 text-sm border rounded">Clear</button>

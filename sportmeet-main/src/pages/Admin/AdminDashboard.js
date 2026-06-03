@@ -2,7 +2,8 @@ import React from 'react';
 import { useQuery } from 'react-query';
 import { Link } from 'react-router-dom';
 import { coreAPI } from '../../services/api';
-import { 
+import {
+  ArrowRight,
   Users, 
   MapPin, 
   Calendar, 
@@ -20,7 +21,7 @@ import LoadingSpinner from '../../components/UI/LoadingSpinner';
 
 const AdminDashboard = () => {
   // Fetch dashboard stats
-  const { data: statsData, isLoading: statsLoading, error: statsError } = useQuery(
+  const { data: statsData, isLoading: statsLoading, error: statsError, refetch: refetchStats } = useQuery(
     'admin-dashboard-stats',
     coreAPI.getAdminDashboardStats,
     {
@@ -30,9 +31,9 @@ const AdminDashboard = () => {
   );
 
   // Fetch recent activity
-  const { data: activityData, isLoading: activityLoading } = useQuery(
+  const { data: activityData, isLoading: activityLoading, error: activityError } = useQuery(
     'admin-recent-activity',
-    coreAPI.getAdminRecentActivity,
+    () => coreAPI.getAdminRecentActivity({ limit: 10 }),
     {
       staleTime: 2 * 60 * 1000, // 2 minutes
       cacheTime: 5 * 60 * 1000, // 5 minutes
@@ -40,7 +41,7 @@ const AdminDashboard = () => {
   );
 
   // Fetch top venues
-  const { data: topVenuesData, isLoading: venuesLoading } = useQuery(
+  const { data: topVenuesData, isLoading: venuesLoading, error: venuesError } = useQuery(
     'admin-top-venues',
     coreAPI.getAdminTopVenues,
     {
@@ -49,10 +50,11 @@ const AdminDashboard = () => {
     }
   );
 
-  const loading = statsLoading || activityLoading || venuesLoading;
+  const loading = (statsLoading || activityLoading || venuesLoading) && !statsData && !activityData && !topVenuesData;
   const stats = statsData?.data || {};
-  const recentActivity = activityData?.data || [];
-  const topVenues = topVenuesData?.data || [];
+  const recentActivity = Array.isArray(activityData?.data) ? activityData.data : [];
+  const topVenues = Array.isArray(topVenuesData?.data) ? topVenuesData.data : [];
+  const hasDashboardError = Boolean(statsError || activityError || venuesError);
 
   const statCards = [
     {
@@ -61,7 +63,7 @@ const AdminDashboard = () => {
       change: undefined,
       changeType: undefined,
       icon: Users,
-      color: 'blue'
+      iconClass: 'bg-primary-100 text-primary-600'
     },
     {
       name: 'Total Venues',
@@ -69,7 +71,7 @@ const AdminDashboard = () => {
       change: undefined,
       changeType: undefined,
       icon: MapPin,
-      color: 'green'
+      iconClass: 'bg-green-100 text-green-600'
     },
     {
       name: 'Total Bookings',
@@ -77,7 +79,7 @@ const AdminDashboard = () => {
       change: undefined,
       changeType: undefined,
       icon: Calendar,
-      color: 'purple'
+      iconClass: 'bg-teal-100 text-teal-600'
     },
     {
       name: 'Total Revenue',
@@ -85,7 +87,7 @@ const AdminDashboard = () => {
       change: undefined,
       changeType: undefined,
       icon: DollarSign,
-      color: 'emerald'
+      iconClass: 'bg-emerald-100 text-emerald-600'
     }
   ];
 
@@ -112,7 +114,7 @@ const AdminDashboard = () => {
       name: 'Total Events',
       value: stats.events?.total || 0,
       icon: Calendar,
-      color: 'text-blue-600'
+      color: 'text-primary-600'
     }
   ];
 
@@ -125,7 +127,7 @@ const AdminDashboard = () => {
       case 'error':
         return <XCircle className="h-4 w-4 text-red-500" />;
       default:
-        return <Activity className="h-4 w-4 text-blue-500" />;
+        return <Activity className="h-4 w-4 text-primary-500" />;
     }
   };
 
@@ -137,27 +139,46 @@ const AdminDashboard = () => {
     );
   }
 
-  if (statsError) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-center">
-          <XCircle className="mx-auto h-12 w-12 text-red-500 mb-4" />
-          <p className="text-red-600">Failed to load dashboard data</p>
-          <p className="text-sm text-gray-500 mt-2">Please try refreshing the page</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard Overview</h1>
-        <p className="mt-1 text-sm text-gray-500">
-          Welcome back! Here's what's happening with your platform today.
-        </p>
+      <div className="overflow-hidden rounded-3xl bg-slate-950 p-6 text-white md:p-8">
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-lime-200">
+              <Activity className="h-4 w-4" />
+              Platform control center
+            </p>
+            <h1 className="text-3xl font-extrabold md:text-4xl">Dashboard Overview</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-300">
+              Monitor users, venues, bookings, events, payments, reviews, and operational activity across SportMeet.
+            </p>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            <Link to="/admin/venues" className="btn btn-primary">Review Venues</Link>
+            <Link to="/admin/settings" className="btn btn-outline border-white/25 text-white hover:bg-white/10">CMS Settings</Link>
+          </div>
+        </div>
       </div>
+
+      {hasDashboardError && (
+        <Card className="border-amber-200 bg-amber-50 p-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600" />
+              <div>
+                <p className="text-sm font-bold text-amber-900">Some dashboard data could not load.</p>
+                <p className="mt-1 text-sm text-amber-800">
+                  The admin panel is still usable. Check API permissions or refresh the stats endpoint.
+                </p>
+              </div>
+            </div>
+            <button type="button" onClick={() => refetchStats()} className="btn btn-outline bg-white">
+              Retry Stats
+            </button>
+          </div>
+        </Card>
+      )}
 
       {/* Main Stats */}
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -167,8 +188,8 @@ const AdminDashboard = () => {
             <Card key={stat.name} className="p-6">
               <div className="flex items-center">
                 <div className="flex-shrink-0">
-                  <div className={`p-3 rounded-lg bg-${stat.color}-100`}>
-                    <Icon className={`h-6 w-6 text-${stat.color}-600`} />
+                  <div className={`p-3 rounded-lg ${stat.iconClass}`}>
+                    <Icon className="h-6 w-6" />
                   </div>
                 </div>
                 <div className="ml-5 w-0 flex-1">
@@ -208,6 +229,30 @@ const AdminDashboard = () => {
         })}
       </div>
 
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+        {[
+          { label: 'Manage Users', href: '/admin/users', icon: Users },
+          { label: 'Approve Venues', href: '/admin/venues', icon: MapPin },
+          { label: 'Review Bookings', href: '/admin/bookings', icon: Calendar },
+          { label: 'CMS & Branding', href: '/admin/settings', icon: Activity },
+        ].map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link key={item.label} to={item.href} className="group rounded-2xl border border-gray-200 bg-white p-4 shadow-sm transition hover:-translate-y-1 hover:border-primary-200 hover:bg-primary-50 hover:shadow-md">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary-50 text-primary-700">
+                    <Icon className="h-5 w-5" />
+                  </div>
+                  <span className="font-bold text-gray-950">{item.label}</span>
+                </div>
+                <ArrowRight className="h-4 w-4 text-primary-600 transition group-hover:translate-x-1" />
+              </div>
+            </Link>
+          );
+        })}
+      </div>
+
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
         {/* Revenue Chart */}
         <Card className="p-6 flex flex-col h-full">
@@ -215,7 +260,7 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900">Revenue Trend</h3>
             <div className="flex items-center text-sm text-green-600">
               <TrendingUp className="h-4 w-4 mr-1" />
-              +22% from last month
+              Live monthly summary
             </div>
           </div>
           
@@ -233,7 +278,7 @@ const AdminDashboard = () => {
                       <div 
                         className={`w-full rounded-t-lg transition-all duration-500 ${
                           hasData 
-                            ? 'bg-gradient-to-t from-blue-600 to-blue-400' 
+                            ? 'bg-gradient-to-t from-primary-600 to-primary-400' 
                             : 'bg-gray-200'
                         }`}
                         style={{ 
@@ -274,7 +319,7 @@ const AdminDashboard = () => {
             <h3 className="text-lg font-medium text-gray-900">Recent Activity</h3>
             <Link 
               to="/admin/activity-log" 
-              className="text-sm text-blue-600 hover:text-blue-500 transition-colors"
+              className="text-sm text-primary-600 hover:text-primary-500 transition-colors"
             >
               View all
             </Link>
@@ -284,6 +329,13 @@ const AdminDashboard = () => {
           <div className="flex-1 min-h-[400px] max-h-[400px] overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100">
             <div className="flow-root">
               <ul className="-mb-8">
+                {recentActivity.length === 0 && (
+                  <li className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+                    <Activity className="mx-auto h-8 w-8 text-gray-400" />
+                    <p className="mt-3 text-sm font-semibold text-gray-700">No recent activity yet</p>
+                    <p className="mt-1 text-xs text-gray-500">New bookings, users, venues, payments, and reviews will appear here.</p>
+                  </li>
+                )}
                 {recentActivity.slice(0, 5).map((activity, activityIdx) => (
                   <li key={activity.id}>
                     <div className="relative pb-6">
@@ -322,9 +374,10 @@ const AdminDashboard = () => {
                       <div className="flex items-center justify-center py-4">
                         <Link 
                           to="/admin/activity-log" 
-                          className="text-sm text-blue-600 hover:text-blue-500 font-medium"
+                          className="text-sm text-primary-600 hover:text-primary-500 font-medium"
                         >
-                          View {recentActivity.length - 5} more activities →
+                          View {recentActivity.length - 5} more activities
+                          <ArrowRight className="ml-1 inline h-4 w-4" />
                         </Link>
                       </div>
                     </div>
@@ -340,10 +393,17 @@ const AdminDashboard = () => {
       <Card className="p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-medium text-gray-900">Top Performing Venues</h3>
-          <button className="text-sm text-blue-600 hover:text-blue-500">
+          <Link to="/admin/venues" className="text-sm text-primary-600 hover:text-primary-500">
             View all venues
-          </button>
+          </Link>
         </div>
+        {topVenues.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-8 text-center">
+            <MapPin className="mx-auto h-8 w-8 text-gray-400" />
+            <p className="mt-3 text-sm font-semibold text-gray-700">No venue performance data yet</p>
+            <p className="mt-1 text-xs text-gray-500">Venues with confirmed bookings will appear in this table.</p>
+          </div>
+        ) : (
         <div className="overflow-hidden">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
@@ -371,7 +431,7 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="h-10 w-10 flex-shrink-0">
-                        <div className="h-10 w-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-lg bg-gradient-to-r from-primary-500 to-primary-700 flex items-center justify-center">
                           <span className="text-white font-medium text-sm">
                             {venue.name.charAt(0)}
                           </span>
@@ -412,6 +472,7 @@ const AdminDashboard = () => {
             </tbody>
           </table>
         </div>
+        )}
       </Card>
     </div>
   );

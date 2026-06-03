@@ -1,212 +1,239 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuery } from 'react-query';
 import { eventsAPI } from '../services/api';
-import Card from '../components/UI/Card';
 import Button from '../components/UI/Button';
-import Input from '../components/UI/Input';
-import LoadingSpinner from '../components/UI/LoadingSpinner';
-import { Calendar, Users, Search, Filter, Grid, List, Clock, MapPin, DollarSign } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import EmptyState from '../components/UI/EmptyState';
+import { SkeletonCardGrid } from '../components/UI/Skeleton';
+import PageMeta from '../components/SEO/PageMeta';
+import {
+  ArrowRight,
+  Calendar,
+  Clock,
+  DollarSign,
+  Grid,
+  List,
+  MapPin,
+  Search,
+  Trophy,
+  Users,
+} from 'lucide-react';
+
+const API_ORIGIN = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '');
+const fallbackEventImage = `${API_ORIGIN}/media/demo/generated-event.png`;
+
+const mediaUrl = (url) => {
+  if (!url) return null;
+  if (/^https?:\/\//i.test(url)) return url;
+  return `${API_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+};
+
+const fallbackEvents = [
+  { id: 'demo-tennis-ladder', title: 'Friday Night Tennis Ladder', sport_category: 'Tennis', event_type: 'tournament', start_date: '2026-06-12', start_time: '18:00:00', end_time: '21:00:00', city: 'Brisbane', venue_name: 'Brisbane Racquet Hub', currency: 'AUD', entry_fee: '18.00', max_participants: 32, participant_count: 18, cover_image_url: fallbackEventImage },
+  { id: 'demo-basketball-cup', title: '3x3 Basketball Community Cup', sport_category: 'Basketball', event_type: 'competition', start_date: '2026-06-20', start_time: '17:30:00', end_time: '20:30:00', city: 'Melbourne', venue_name: 'Melbourne Sports Complex', currency: 'AUD', entry_fee: '25.00', max_participants: 48, participant_count: 26, cover_image_url: `${API_ORIGIN}/media/events/covers/3x3-basketball-community-cup.jpg` },
+  { id: 'demo-cricket-social', title: 'Sunday Cricket Social', sport_category: 'Cricket', event_type: 'social', start_date: '2026-06-28', start_time: '09:00:00', end_time: '12:00:00', city: 'Sydney', venue_name: 'Sydney Athletic Centre', currency: 'AUD', entry_fee: '0.00', max_participants: 24, participant_count: 11, cover_image_url: fallbackEventImage },
+];
+
+const eventTypes = [
+  { value: '', label: 'All types' },
+  { value: 'tournament', label: 'Tournament' },
+  { value: 'league', label: 'League' },
+  { value: 'training', label: 'Training' },
+  { value: 'social', label: 'Social' },
+  { value: 'competition', label: 'Competition' },
+];
 
 const EventsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filters] = useState({
-    event_type: '',
-    sport_category: '',
-  });
+  const [filters, setFilters] = useState({ event_type: '', sport_category: '', city: '', price: '' });
   const [viewMode, setViewMode] = useState('grid');
 
   const { data: eventsData, isLoading, error } = useQuery(
     ['events', searchTerm, filters],
     () => eventsAPI.getEvents({
-      search: searchTerm,
-      ...filters,
+      search: searchTerm || undefined,
+      event_type: filters.event_type || undefined,
+      sport_category: filters.sport_category || undefined,
+      city: filters.city || undefined,
     }),
     { staleTime: 5 * 60 * 1000 }
   );
 
-  const events = eventsData?.data?.results || [];
-  const API_ORIGIN = (process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api').replace(/\/api\/?$/, '');
-  const mediaUrl = (url) => {
-    if (!url) return null;
-    if (/^https?:\/\//i.test(url)) return url;
-    return `${API_ORIGIN}${url.startsWith('/') ? url : `/${url}`}`;
+  const rawEvents = Array.isArray(eventsData?.data?.results) && eventsData.data.results.length > 0
+    ? eventsData.data.results
+    : Array.isArray(eventsData?.data) && eventsData.data.length > 0
+    ? eventsData.data
+    : fallbackEvents;
+
+  const events = useMemo(() => rawEvents.filter((event) => {
+    if (filters.price === 'free' && Number(event.entry_fee || 0) > 0) return false;
+    if (filters.price === 'paid' && Number(event.entry_fee || 0) <= 0) return false;
+    return true;
+  }), [rawEvents, filters.price]);
+
+  const sportOptions = Array.from(new Set(rawEvents.map((event) => event.sport_category).filter(Boolean))).sort();
+  const cityOptions = Array.from(new Set(rawEvents.map((event) => event.city || event.venue_city).filter(Boolean))).sort();
+  const freeCount = rawEvents.filter((event) => Number(event.entry_fee || 0) <= 0).length;
+
+  const clearFilters = () => {
+    setSearchTerm('');
+    setFilters({ event_type: '', sport_category: '', city: '', price: '' });
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">Sports Events</h1>
-          <p className="text-lg text-gray-600">
-            Join exciting sports events and tournaments in your area
-          </p>
-        </div>
+    <div className="min-h-screen bg-[#F7FAF8]">
+      <PageMeta
+        title="Sports Events"
+        description="Discover tournaments, leagues, socials, and community sports events near you."
+      />
 
-        {/* Search and Filters */}
-        <Card className="p-6 mb-8">
-          <div className="flex flex-col lg:flex-row gap-4">
-            <div className="flex-1">
+      <section className="bg-slate-950 text-white">
+        <div className="mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+          <div className="grid gap-8 lg:grid-cols-[1fr_380px] lg:items-end">
+            <div>
+              <p className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-sm font-bold text-lime-200">
+                <Trophy className="h-4 w-4" />
+                Tournaments, socials, training, and leagues
+              </p>
+              <h1 className="text-4xl font-extrabold sm:text-5xl">Join sports events near you</h1>
+              <p className="mt-4 max-w-2xl text-base leading-7 text-slate-300">
+                Find local competitions, open games, training sessions, and community events with clear dates, pricing, and spots left.
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 rounded-2xl bg-white/8 p-3 ring-1 ring-white/10">
+              <Stat value={rawEvents.length} label="events" />
+              <Stat value={sportOptions.length || 'Multi'} label="sports" />
+              <Stat value={freeCount} label="free" />
+            </div>
+          </div>
+
+          <div className="mt-8 rounded-2xl border border-white/10 bg-white p-3 text-slate-950 shadow-2xl">
+            <div className="grid gap-3 lg:grid-cols-[1.4fr_1fr_1fr_0.8fr_auto]">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                <Input
-                  placeholder="Search events, sports, or locations..."
+                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-slate-400" />
+                <input
+                  placeholder="Search events, sports, venues, or cities"
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                  className="h-12 w-full rounded-xl border border-slate-200 pl-10 pr-3 text-sm outline-none focus:border-primary-500"
                 />
               </div>
-            </div>
-            <div className="flex gap-2">
-              <Button variant="outline">
-                <Filter className="w-4 h-4 mr-2" />
-                Filters
+              <select value={filters.sport_category} onChange={(event) => setFilters((current) => ({ ...current, sport_category: event.target.value }))} className="h-12 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary-500">
+                <option value="">All sports</option>
+                {sportOptions.map((sport) => <option key={sport} value={sport}>{sport}</option>)}
+              </select>
+              <select value={filters.city} onChange={(event) => setFilters((current) => ({ ...current, city: event.target.value }))} className="h-12 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary-500">
+                <option value="">All cities</option>
+                {cityOptions.map((city) => <option key={city} value={city}>{city}</option>)}
+              </select>
+              <select value={filters.price} onChange={(event) => setFilters((current) => ({ ...current, price: event.target.value }))} className="h-12 rounded-xl border border-slate-200 px-3 text-sm outline-none focus:border-primary-500">
+                <option value="">Any price</option>
+                <option value="free">Free</option>
+                <option value="paid">Paid</option>
+              </select>
+              <Button type="button" variant="outline" onClick={clearFilters} className="h-12 justify-center">
+                Clear
               </Button>
-              <div className="flex border rounded-md">
-                <button
-                  onClick={() => setViewMode('grid')}
-                  className={`p-2 ${viewMode === 'grid' ? 'bg-primary-100 text-primary-600' : 'text-gray-400'}`}
-                >
-                  <Grid className="w-4 h-4" />
-                </button>
-                <button
-                  onClick={() => setViewMode('list')}
-                  className={`p-2 ${viewMode === 'list' ? 'bg-primary-100 text-primary-600' : 'text-gray-400'}`}
-                >
-                  <List className="w-4 h-4" />
-                </button>
-              </div>
             </div>
           </div>
-        </Card>
+        </div>
+      </section>
 
-        {/* Results */}
-        {isLoading ? (
-          <div className="flex justify-center py-12">
-            <LoadingSpinner size="lg" />
+      <main className="mx-auto max-w-7xl px-4 py-9 sm:px-6 lg:px-8">
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+          <div>
+            <p className="text-sm font-bold uppercase tracking-wide text-primary-700">Event discovery</p>
+            <h2 className="mt-1 text-3xl font-extrabold text-slate-950">{events.length} events available</h2>
+            <p className="mt-2 text-sm text-slate-600">Use filters to narrow by sport, city, price, and event format.</p>
           </div>
-        ) : error ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500">Failed to load events. Please try again.</p>
+          <div className="inline-flex overflow-hidden rounded-xl border border-slate-200 bg-white p-1 shadow-sm">
+            <button type="button" onClick={() => setViewMode('grid')} aria-label="Grid view" className={`rounded-lg p-2 ${viewMode === 'grid' ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-slate-50'}`}>
+              <Grid className="h-5 w-5" />
+            </button>
+            <button type="button" onClick={() => setViewMode('list')} aria-label="List view" className={`rounded-lg p-2 ${viewMode === 'list' ? 'bg-primary-50 text-primary-700' : 'text-slate-500 hover:bg-slate-50'}`}>
+              <List className="h-5 w-5" />
+            </button>
           </div>
-        ) : events.length === 0 ? (
-          <div className="text-center py-12">
-            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
-              No events found
-            </h3>
-            <p className="text-gray-600">
-              Try adjusting your search criteria or check back later.
-            </p>
-          </div>
-        ) : (
-          <div className={`grid gap-6 ${
-            viewMode === 'grid' 
-              ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3' 
-              : 'grid-cols-1'
-          }`}>
-            {events.map((event) => (
-              <Link 
-                key={event.id} 
-                to={`/events/${event.id}`}
-                className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 cursor-pointer group"
-              >
-                {/* Event Image with Date Badge */}
-                <div className="relative h-48 overflow-hidden">
-                  {event.gallery_images && event.gallery_images.length > 0 ? (
-                    <img 
-                      src={mediaUrl(event.gallery_images[0].image)} 
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : event.cover_image_url ? (
-                    <img 
-                      src={mediaUrl(event.cover_image_url)} 
-                      alt={event.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
-                      <div className="text-white text-center">
-                        <Calendar className="w-12 h-12 mx-auto mb-2 opacity-80" />
-                        <span className="text-sm font-semibold">{event.sport_category}</span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Date Badge */}
-                  <div className="absolute top-3 right-3 bg-blue-600 text-white px-2 py-1 rounded-full text-xs font-semibold shadow-lg">
-                    {new Date(event.start_date).toLocaleDateString('en-US', { 
-                      month: 'short', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })}
-                  </div>
-                </div>
+        </div>
 
-                {/* Event Details */}
-                <div className="p-4">
-                  <h3 className="text-lg font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">
-                    {event.title}
-                  </h3>
-                  
-                  {/* Host */}
-                  {event.host_name && (
-                    <div className="flex items-center mb-3">
-                      <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center mr-2">
-                        <Users className="w-2.5 h-2.5 text-white" />
-                      </div>
-                      <span className="text-gray-700 font-semibold text-sm">{event.host_name}</span>
-                    </div>
-                  )}
-
-                  {/* Time */}
-                  <div className="flex items-center mb-3">
-                    <div className="w-4 h-4 bg-blue-500 rounded-full flex items-center justify-center mr-2">
-                      <Clock className="w-2.5 h-2.5 text-white" />
-                    </div>
-                    <span className="text-gray-600 text-sm">
-                      {event.start_time || 'midnight'} - {event.end_time || 'midnight'}
-                    </span>
-                  </div>
-
-                  {/* Location */}
-                  <div className="flex items-center mb-3">
-                    <div className="w-4 h-4 bg-red-500 rounded-full flex items-center justify-center mr-2">
-                      <MapPin className="w-2.5 h-2.5 text-white" />
-                    </div>
-                    <span className="text-gray-600 text-sm">
-                      {event.venue_name}{(event.city || event.venue_city) ? `, ${event.city || event.venue_city}` : ''}
-                    </span>
-                  </div>
-
-                  {/* Price */}
-                  <div className="flex items-center mb-3">
-                    <div className="w-4 h-4 bg-yellow-500 rounded-full flex items-center justify-center mr-2">
-                      <DollarSign className="w-2.5 h-2.5 text-white" />
-                    </div>
-                    <span className="text-gray-600 text-sm font-semibold">
-                      {event.currency}${parseFloat(event.entry_fee || 0).toFixed(2)}
-                    </span>
-                  </div>
-
-                  {/* Sport */}
-                  <div className="flex items-center">
-                    <div className="w-4 h-4 bg-purple-500 rounded-full flex items-center justify-center mr-2">
-                      <Users className="w-2.5 h-2.5 text-white" />
-                    </div>
-                    <span className="text-gray-600 text-sm font-medium capitalize">
-                      {event.sport_category}
-                    </span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+        {error && (
+          <div className="mb-6 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm font-semibold text-amber-800">
+            Showing demo events while the API is unavailable.
           </div>
         )}
-      </div>
+
+        {isLoading ? (
+          <SkeletonCardGrid count={6} />
+        ) : events.length === 0 ? (
+          <EmptyState
+            icon={Calendar}
+            title="No events found"
+            description="Try clearing filters or check back for new tournaments and social sessions."
+            action={<Button onClick={clearFilters}>Clear Filters</Button>}
+          />
+        ) : (
+          <div className={`grid gap-6 ${viewMode === 'grid' ? 'md:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
+            {events.map((event) => <EventCard key={event.id} event={event} list={viewMode === 'list'} />)}
+          </div>
+        )}
+      </main>
     </div>
+  );
+};
+
+const Stat = ({ value, label }) => (
+  <div className="rounded-xl bg-white/10 px-3 py-4 text-center">
+    <div className="text-2xl font-black text-white">{value}</div>
+    <div className="text-xs font-bold uppercase tracking-wide text-slate-300">{label}</div>
+  </div>
+);
+
+const EventCard = ({ event, list = false }) => {
+  const capacity = Number(event.max_participants || event.capacity || 0);
+  const participants = Number(event.participant_count || event.participants_count || 0);
+  const spotsLeft = capacity > 0 ? Math.max(capacity - participants, 0) : null;
+  const progress = capacity > 0 ? Math.min(100, Math.round((participants / capacity) * 100)) : 35;
+  const image = mediaUrl(event.gallery_images?.[0]?.image) || mediaUrl(event.cover_image_url || event.cover_image) || fallbackEventImage;
+  const dateLabel = event.start_date ? new Date(event.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'Date TBD';
+
+  return (
+    <Link to={`/events/${event.id}`} className={`group overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg ${list ? 'md:grid md:grid-cols-[300px_1fr]' : ''}`}>
+      <div className={`relative ${list ? 'h-64 md:h-full' : 'aspect-video'}`}>
+        <img src={image} alt={event.title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+        <span className="absolute left-3 top-3 rounded-full bg-primary-500 px-3 py-1 text-xs font-bold text-white shadow-sm">{dateLabel}</span>
+        <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-slate-900 shadow-sm">
+          {Number(event.entry_fee || 0) > 0 ? `${event.currency || 'AUD'} $${Number(event.entry_fee).toFixed(0)}` : 'Free'}
+        </span>
+      </div>
+
+      <div className="p-5">
+        <div className="mb-3 flex flex-wrap gap-2">
+          <span className="rounded-full bg-primary-50 px-2.5 py-1 text-xs font-bold text-primary-700">{event.sport_category || 'Sport'}</span>
+          <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold capitalize text-slate-700">{event.event_type || 'Event'}</span>
+        </div>
+        <h3 className="text-xl font-extrabold text-slate-950 group-hover:text-primary-700">{event.title}</h3>
+        <div className="mt-4 grid gap-2 text-sm text-slate-600">
+          <span className="inline-flex items-center gap-2"><Clock className="h-4 w-4 text-primary-600" />{(event.start_time || 'TBD').slice(0, 5)} - {(event.end_time || 'TBD').slice(0, 5)}</span>
+          <span className="inline-flex items-center gap-2"><MapPin className="h-4 w-4 text-red-500" />{event.venue_name || 'Venue TBD'}{(event.city || event.venue_city) ? `, ${event.city || event.venue_city}` : ''}</span>
+          <span className="inline-flex items-center gap-2"><DollarSign className="h-4 w-4 text-amber-500" />{Number(event.entry_fee || 0) > 0 ? `${event.currency || 'AUD'} $${Number(event.entry_fee).toFixed(2)}` : 'Free registration'}</span>
+        </div>
+
+        <div className="mt-5">
+          <div className="mb-2 flex items-center justify-between text-xs font-bold text-slate-600">
+            <span>{participants} joined{capacity ? ` / ${capacity}` : ''}</span>
+            <span>{spotsLeft === null ? 'Open capacity' : spotsLeft > 0 ? `${spotsLeft} spots left` : 'Full soon'}</span>
+          </div>
+          <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+            <div className="h-full rounded-full bg-primary-500" style={{ width: `${progress}%` }} />
+          </div>
+        </div>
+
+        <div className="mt-5 inline-flex items-center gap-1 text-sm font-extrabold text-primary-700">
+          Register Now
+          <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
+        </div>
+      </div>
+    </Link>
   );
 };
 

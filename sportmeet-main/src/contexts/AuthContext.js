@@ -3,6 +3,24 @@ import { authAPI } from '../services/api';
 
 const AuthContext = createContext();
 
+const formatApiError = (data, fallback) => {
+  if (!data) return fallback;
+  if (typeof data === 'string') return data;
+  if (data.error) return data.error;
+  if (data.detail) return data.detail;
+  if (Array.isArray(data)) return data.join(' ');
+  if (typeof data === 'object') {
+    const messages = Object.entries(data).flatMap(([field, value]) => {
+      const label = field.replace(/_/g, ' ');
+      if (Array.isArray(value)) return value.map((item) => `${label}: ${item}`);
+      if (typeof value === 'string') return `${label}: ${value}`;
+      return [];
+    });
+    if (messages.length > 0) return messages.join(' ');
+  }
+  return fallback;
+};
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -61,7 +79,7 @@ export const AuthProvider = ({ children }) => {
       console.error('Error response:', error.response?.data);
       return { 
         success: false, 
-        error: error.response?.data?.error || error.message || 'Login failed' 
+        error: formatApiError(error.response?.data, error.message || 'Login failed')
       };
     }
   };
@@ -79,7 +97,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Registration failed' 
+        error: formatApiError(error.response?.data, 'Registration failed')
       };
     }
   };
@@ -92,7 +110,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Profile update failed' 
+        error: formatApiError(error.response?.data, 'Profile update failed')
       };
     }
   };
@@ -104,7 +122,7 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       return { 
         success: false, 
-        error: error.response?.data?.error || 'Password change failed' 
+        error: formatApiError(error.response?.data, 'Password change failed')
       };
     }
   };

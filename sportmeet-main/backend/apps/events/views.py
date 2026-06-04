@@ -2,7 +2,7 @@ from rest_framework import generics, status, filters
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated, IsAuthenticatedOrReadOnly
-from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.parsers import JSONParser, MultiPartParser, FormParser
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Q, Count
 from django.utils import timezone
@@ -16,7 +16,7 @@ from .serializers import (
 
 class EventListView(generics.ListCreateAPIView):
     """List all events or create a new event."""
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
     queryset = Event.objects.filter(status='published', is_public=True).select_related('organizer')
     permission_classes = [IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -71,7 +71,7 @@ class EventDetailView(generics.RetrieveUpdateDestroyAPIView):
         'participants__user', 'comments__user', 'images'
     )
     permission_classes = [IsAuthenticatedOrReadOnly]
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (JSONParser, MultiPartParser, FormParser)
     
     def get_serializer_class(self):
         if self.request.method in ['PUT', 'PATCH']:

@@ -324,7 +324,7 @@ const AmenitiesPage = () => {
                 <Input
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  placeholder="🅿️ or parking"
+                  placeholder="parking or parking-icon"
                 />
               </div>
               <div className="flex items-center">

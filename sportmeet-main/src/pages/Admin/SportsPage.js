@@ -276,7 +276,7 @@ const SportsPage = () => {
                 <Input
                   value={formData.icon}
                   onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
-                  placeholder="⚽ or football"
+                  placeholder="football or ball"
                 />
               </div>
               <div>

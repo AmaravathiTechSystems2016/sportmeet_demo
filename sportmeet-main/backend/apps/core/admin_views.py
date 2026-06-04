@@ -30,7 +30,7 @@ def admin_dashboard_stats(request):
         
         # Venue statistics
         total_venues = Venue.objects.count()
-        active_venues = Venue.objects.filter(status='active').count()
+        active_venues = Venue.objects.filter(status='approved').count()
         pending_venues = Venue.objects.filter(status='pending').count()
         
         # Booking statistics (combine venue bookings + event registrations)

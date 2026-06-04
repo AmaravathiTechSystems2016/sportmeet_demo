@@ -195,3 +195,113 @@ Completed after user review:
    - /api/core/admin/recent-activity/?limit=10 returned HTTP 200
    - /api/core/admin/top-venues/ returned data locally during testing
 5. Frontend production compile and Django backend system check passed after these changes.
+
+FINAL STABILITY PASS
+Completed: 2026-06-04
+
+Issues found and fixed:
+1. Frontend auth error handling:
+   - Registration/login/profile/password errors now show field-level API validation messages instead of a generic fallback.
+
+2. Admin dashboard stats:
+   - Admin "active venues" now counts approved venues, matching the actual venue status model.
+
+3. Event creation API:
+   - Event create/update endpoints now accept JSON payloads in addition to multipart form data.
+   - This keeps the current frontend FormData create flow working and makes direct API/admin integrations safer.
+
+4. Local backend:
+   - Restarted the local backend server so the latest backend fixes are active on http://127.0.0.1:8000.
+
+Verification completed:
+1. Django system check passed.
+2. Backend regression tests passed:
+   - 5 tests passing in apps.core
+   - Added coverage for approved venue admin counts.
+   - Added coverage for JSON event creation.
+3. Frontend production build passed using a temporary build path.
+4. Local API smoke tests passed:
+   - Player registration
+   - Venue owner registration
+   - Admin venue creation with at least one court
+   - Admin event creation with JSON payload
+   - Admin dashboard stats
+   - Admin recent activity
+   - Admin top venues
+5. Local URLs responded:
+   - http://127.0.0.1:5000/ returned HTTP 200
+   - http://127.0.0.1:8000/api/core/health/ returned HTTP 200
+
+ADMIN WARNING AND BUTTON ALIGNMENT FIX
+Completed: 2026-06-04
+
+Issues fixed:
+1. Admin dashboard warning:
+   - "Some dashboard data could not load" no longer appears for transient/partial query errors when dashboard data is available.
+   - Warning now only appears when all dashboard API data is missing and an endpoint error exists.
+   - Retry action now refreshes stats, recent activity, and top venues together.
+
+2. Blank/incorrect buttons on dark headers:
+   - Added a dedicated .btn-on-dark utility for buttons used on dark backgrounds.
+   - Replaced dark-header outline buttons on admin dashboard, player dashboard, profile, and venue owner dashboard.
+   - Added a default height and padding to .btn so raw link-buttons align consistently with Button component buttons.
+
+Verification completed:
+1. Admin dashboard APIs returned HTTP 200:
+   - dashboard-stats
+   - recent-activity
+   - top-venues
+2. Django system check passed.
+3. Backend apps.core tests passed.
+4. Frontend production build passed.
+
+CREATE FLOW FIX PASS
+Completed: 2026-06-04
+
+Issues fixed:
+1. Create Venue:
+   - Venue-owner users now submit with their own user id instead of relying on the admin owner dropdown.
+   - Success, back, and cancel navigation now return venue owners to /venues/manage and admins to /admin/venues.
+   - Fill Test Data now adds a default court so the backend requirement for at least one court is satisfied.
+   - Validation error list now uses clean ASCII text.
+
+2. Create Event:
+   - Event creation no longer overwrites manually typed address/city/state/postcode fields with empty map-picker state.
+   - Event API validation errors now show the first useful backend field error instead of only a generic fallback.
+   - Removed noisy debug logging from event submit.
+
+3. Sports and Amenities:
+   - Cleaned admin form icon placeholders so the UI does not show broken/emoji-dependent placeholder text.
+
+Verification completed:
+1. Django system check passed.
+2. Backend apps.core tests passed.
+3. Local API smoke tests passed:
+   - Admin sport creation
+   - Admin amenity creation
+   - Admin event creation
+   - Admin venue creation with owner and court
+4. Local URLs responded:
+   - http://127.0.0.1:5000/ returned HTTP 200
+   - http://127.0.0.1:8000/api/venues/sports/ returned HTTP 200
+
+BUILD MEMORY FIX
+Completed: 2026-06-04
+
+Issue fixed:
+1. Frontend production build no longer fails with "Zone Allocation failed - process out of memory".
+
+Implementation:
+1. Added scripts/build.js as a small build wrapper.
+2. Updated npm run build to call CRA directly through Node with --max-old-space-size=4096.
+3. The wrapper defaults GENERATE_SOURCEMAP=false and DISABLE_ESLINT_PLUGIN=true for lower-memory production builds.
+
+Verification completed:
+1. Plain npm run build passed using a temporary build path.
+2. Output bundle was generated successfully:
+   - main JavaScript gzip size: 678.83 kB
+   - main CSS gzip size: 16.3 kB
+
+Remaining maintenance note:
+1. CRA still reports old Browserslist/caniuse-lite data.
+2. The production JS bundle is larger than recommended; future improvement should add route-level code splitting.

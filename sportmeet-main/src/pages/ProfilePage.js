@@ -61,7 +61,7 @@ const ProfilePage = () => {
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Link to="/bookings" className="btn btn-primary">View Bookings</Link>
-                <Link to="/venues" className="btn btn-outline border-white/25 text-white hover:bg-white/10">Book a Venue</Link>
+                <Link to="/venues" className="btn btn-on-dark">Book a Venue</Link>
               </div>
             </div>
             <div className="rounded-2xl bg-white p-5 text-slate-950">

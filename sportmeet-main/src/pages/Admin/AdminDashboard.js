@@ -31,7 +31,7 @@ const AdminDashboard = () => {
   );
 
   // Fetch recent activity
-  const { data: activityData, isLoading: activityLoading, error: activityError } = useQuery(
+  const { data: activityData, isLoading: activityLoading, error: activityError, refetch: refetchActivity } = useQuery(
     'admin-recent-activity',
     () => coreAPI.getAdminRecentActivity({ limit: 10 }),
     {
@@ -41,7 +41,7 @@ const AdminDashboard = () => {
   );
 
   // Fetch top venues
-  const { data: topVenuesData, isLoading: venuesLoading, error: venuesError } = useQuery(
+  const { data: topVenuesData, isLoading: venuesLoading, error: venuesError, refetch: refetchTopVenues } = useQuery(
     'admin-top-venues',
     coreAPI.getAdminTopVenues,
     {
@@ -54,7 +54,12 @@ const AdminDashboard = () => {
   const stats = statsData?.data || {};
   const recentActivity = Array.isArray(activityData?.data) ? activityData.data : [];
   const topVenues = Array.isArray(topVenuesData?.data) ? topVenuesData.data : [];
-  const hasDashboardError = Boolean(statsError || activityError || venuesError);
+  const hasDashboardError = Boolean((statsError || activityError || venuesError) && !statsData && !activityData && !topVenuesData);
+  const retryDashboard = () => {
+    refetchStats();
+    refetchActivity();
+    refetchTopVenues();
+  };
 
   const statCards = [
     {
@@ -156,7 +161,7 @@ const AdminDashboard = () => {
           </div>
           <div className="flex flex-wrap gap-3">
             <Link to="/admin/venues" className="btn btn-primary">Review Venues</Link>
-            <Link to="/admin/settings" className="btn btn-outline border-white/25 text-white hover:bg-white/10">CMS Settings</Link>
+            <Link to="/admin/settings" className="btn btn-on-dark">CMS Settings</Link>
           </div>
         </div>
       </div>
@@ -169,12 +174,12 @@ const AdminDashboard = () => {
               <div>
                 <p className="text-sm font-bold text-amber-900">Some dashboard data could not load.</p>
                 <p className="mt-1 text-sm text-amber-800">
-                  The admin panel is still usable. Check API permissions or refresh the stats endpoint.
+                  The admin panel is still usable. Refresh the dashboard data after checking the backend server.
                 </p>
               </div>
             </div>
-            <button type="button" onClick={() => refetchStats()} className="btn btn-outline bg-white">
-              Retry Stats
+            <button type="button" onClick={retryDashboard} className="btn btn-outline bg-white">
+              Retry Dashboard
             </button>
           </div>
         </Card>

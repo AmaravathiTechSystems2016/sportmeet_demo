@@ -10,6 +10,7 @@ import Input from '../../components/UI/Input';
 import Card from '../../components/UI/Card';
 import MapPicker from '../../components/Map/MapPicker';
 import SearchableCheckboxList from '../../components/UI/SearchableCheckboxList';
+import { useAuth } from '../../contexts/AuthContext';
 import { Plus, X, Save, ArrowLeft } from 'lucide-react';
 import toast from 'react-hot-toast';
 
@@ -37,7 +38,9 @@ const CreateVenuePage = () => {
   const MAPBOX_TOKEN = process.env.REACT_APP_MAPBOX_TOKEN || '';
   const [location, setLocation] = useState({ latitude: null, longitude: null, address: '', city: '', state: '', postcode: '', country: 'Australia' });
 
-  const { user } = require('../../contexts/AuthContext').useAuth();
+  const { user } = useAuth();
+  const isVenueOwner = user?.user_type === 'venue_owner';
+  const venuesBackPath = isVenueOwner ? '/venues/manage' : '/admin/venues';
 
   const { data: sportsData, isLoading: sportsLoading } = useQuery(
     'sports',
@@ -74,10 +77,6 @@ const CreateVenuePage = () => {
   const venueOwners = Array.isArray(venueOwnersRaw)
     ? venueOwnersRaw
     : (Array.isArray(venueOwnersRaw?.results) ? venueOwnersRaw.results : []);
-  
-  // Debug venue owners data
-  console.log('Venue owners data:', venueOwnersData);
-  console.log('Venue owners array:', venueOwners);
 
   // Derive allowed sports list from selectedSports for court dropdowns
   const allowedSports = useMemo(() => {
@@ -285,23 +284,19 @@ const CreateVenuePage = () => {
   };
 
   const onSubmit = async (data) => {
-    console.log('onSubmit called with data:', data);
-    console.log('Form errors:', errors);
-    console.log('Selected sports:', selectedSports);
-    console.log('Selected amenities:', selectedAmenities);
-    
     // Validate required fields
     const requiredFields = ['name', 'email', 'phone_number', 'address', 'city', 'state', 'postcode', 'country', 'latitude', 'longitude', 'description', 'currency'];
     const missingFields = requiredFields.filter(field => !data[field] || data[field].toString().trim() === '');
     
     if (missingFields.length > 0) {
-      console.error('Missing required fields:', missingFields);
       toast.error(`Please fill in all required fields: ${missingFields.join(', ')}`);
       return;
     }
     
+    const ownerIdToUse = isVenueOwner ? user?.id : selectedVenueOwner;
+
     // Validate venue owner selection
-    if (!selectedVenueOwner) {
+    if (!ownerIdToUse) {
       toast.error('Please select a venue owner');
       return;
     }
@@ -330,8 +325,6 @@ const CreateVenuePage = () => {
     
     setIsLoading(true);
     try {
-      console.log('Form data received:', data);
-      
       // Create FormData for file uploads
       const formData = new FormData();
       
@@ -341,12 +334,9 @@ const CreateVenuePage = () => {
       });
       
       // Add venue owner (admin can assign; venue owner defaults to self)
-      const ownerIdToUse = (user && user.user_type === 'venue_owner') ? user.id : selectedVenueOwner;
       if (ownerIdToUse) {
         formData.append('owner_id', ownerIdToUse);
       }
-      
-      console.log('Basic form data added to FormData');
       
       // Add sport categories
       const sportCategories = selectedSports.map(id => {
@@ -431,28 +421,17 @@ const CreateVenuePage = () => {
       formData.append('status', 'approved');
       formData.append('is_verified', 'true');
       formData.append('is_featured', 'false');
-      
+
       // Do not append raw courts again; sanitized courtsData already added above
-
-      console.log('Final FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(`${key}:`, value);
-      }
-
-      const response = await venuesAPI.createVenue(formData);
-      console.log('Venue creation response:', response);
+      await venuesAPI.createVenue(formData);
       
       // Invalidate venue queries to refresh the list
       queryClient.invalidateQueries('admin-venues');
       queryClient.invalidateQueries('venues');
       
       toast.success('Venue created successfully!');
-      navigate('/admin/venues');
+      navigate(venuesBackPath);
     } catch (error) {
-      console.error('Error creating venue:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      
       // Handle different error types
       if (error.response?.status === 400) {
         const errorData = error.response.data;
@@ -492,7 +471,7 @@ const CreateVenuePage = () => {
           <div className="flex items-center space-x-4">
             <Button
               variant="outline"
-              onClick={() => navigate('/admin/venues')}
+              onClick={() => navigate(venuesBackPath)}
               className="flex items-center space-x-2"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -519,8 +498,29 @@ const CreateVenuePage = () => {
                 setValue('longitude', '144.9631');
                 setValue('description', 'This is a test venue for debugging purposes.');
                 setValue('currency', 'AUD');
-                setSelectedSports([sports[0]?.id].filter(Boolean));
+                const firstSport = sports[0];
+                setSelectedSports([firstSport?.id].filter(Boolean));
                 setSelectedAmenities([amenities[0]?.id].filter(Boolean));
+                setCourts([{
+                  id: Date.now(),
+                  name: 'Court 1',
+                  sport: firstSport?.name || '',
+                  surface_type: 'Hard Court',
+                  is_indoor: true,
+                  max_players: 4,
+                  booking_duration_minutes: 60,
+                  price_per_duration: 35,
+                  gallery_images: [],
+                  availability: {
+                    monday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    tuesday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    wednesday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    thursday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    friday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    saturday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                    sunday: { is_available: true, windows: [{ start_time: '09:00', end_time: '21:00' }] },
+                  },
+                }]);
                 toast.success('Test data filled!');
               }}
             >
@@ -534,16 +534,13 @@ const CreateVenuePage = () => {
               <h3 className="text-red-800 font-medium mb-2">Please fix the following errors:</h3>
               <ul className="text-red-700 text-sm space-y-1">
                 {Object.entries(errors).map(([field, error]) => (
-                  <li key={field}>• {field}: {error.message}</li>
+                  <li key={field}>- {field}: {error.message}</li>
                 ))}
               </ul>
             </Card>
           )}
 
-          <form onSubmit={(e) => {
-            console.log('Form submit event triggered');
-            handleSubmit(onSubmit)(e);
-          }} className="space-y-6">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {/* Basic Information */}
             <Card className="p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Basic Information</h2>
@@ -1226,7 +1223,7 @@ const CreateVenuePage = () => {
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => navigate('/admin/venues')}
+                onClick={() => navigate(venuesBackPath)}
               >
                 Cancel
               </Button>

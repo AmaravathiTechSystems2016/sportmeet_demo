@@ -51,10 +51,23 @@ const CreateEventPage = () => {
     setEventImages(prev => prev.filter((_, i) => i !== index));
   };
 
+  const formatApiError = (error, fallback) => {
+    const payload = error.response?.data;
+    if (!payload) return fallback;
+    if (typeof payload === 'string') return payload;
+    if (payload.error) return payload.error;
+    if (payload.detail) return payload.detail;
+    const firstFieldError = Object.entries(payload)[0];
+    if (firstFieldError) {
+      const [field, value] = firstFieldError;
+      const message = Array.isArray(value) ? value[0] : value;
+      return `${field}: ${message}`;
+    }
+    return fallback;
+  };
+
   const onSubmit = async (data) => {
     setIsLoading(true);
-    console.log('Form data:', data);
-    console.log('Event images:', eventImages);
     
     try {
       // Create FormData for file uploads
@@ -67,15 +80,21 @@ const CreateEventPage = () => {
         }
       });
       
-      // Add location fields
-      formData.append('venue_name', data.venue_name || '');
-      formData.append('address', location.address || '');
-      formData.append('city', location.city || '');
-      formData.append('state', location.state || '');
-      formData.append('postcode', location.postcode || '');
-      formData.append('country', location.country || 'Australia');
-      formData.append('latitude', location.latitude || '');
-      formData.append('longitude', location.longitude || '');
+      // Keep manually typed fields unless the map picker supplied a newer value.
+      const locationPayload = {
+        venue_name: data.venue_name || '',
+        address: location.address || data.address || '',
+        city: location.city || data.city || '',
+        state: location.state || data.state || '',
+        postcode: location.postcode || data.postcode || '',
+        country: location.country || data.country || 'Australia',
+        latitude: location.latitude || data.latitude || '',
+        longitude: location.longitude || data.longitude || '',
+      };
+
+      Object.entries(locationPayload).forEach(([key, value]) => {
+        formData.set(key, value);
+      });
       
       // Add event images
       eventImages.forEach((file, index) => {
@@ -86,13 +105,7 @@ const CreateEventPage = () => {
         formData.append('is_public', 'true');
       }
 
-      console.log('FormData contents:');
-      for (let [key, value] of formData.entries()) {
-        console.log(key, value);
-      }
-
-      const response = await eventsAPI.createEvent(formData);
-      console.log('Event creation response:', response);
+      await eventsAPI.createEvent(formData);
       
       // Invalidate and refetch events queries
       queryClient.invalidateQueries('admin-events');
@@ -101,10 +114,7 @@ const CreateEventPage = () => {
       toast.success('Event created successfully!');
       navigate('/admin/events');
     } catch (error) {
-      console.error('Error creating event:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      toast.error(error.response?.data?.error || error.response?.data?.detail || 'Failed to create event');
+      toast.error(formatApiError(error, 'Failed to create event'));
     } finally {
       setIsLoading(false);
     }

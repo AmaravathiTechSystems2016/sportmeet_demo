@@ -123,3 +123,92 @@ class PublicApiSmokeTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertIn('Published Tennis Social', titles)
         self.assertNotIn('Draft Tennis Social', titles)
+
+
+class AdminApiSmokeTests(TestCase):
+    def setUp(self):
+        self.client = APIClient()
+        self.User = get_user_model()
+        self.admin = self.User.objects.create_user(
+            username='admin',
+            email='admin@example.com',
+            password='admin12345',
+            first_name='Admin',
+            last_name='User',
+            user_type='admin',
+            is_staff=True,
+            is_superuser=True,
+        )
+        self.owner = self.User.objects.create_user(
+            username='owner-admin-smoke',
+            email='owner-admin-smoke@example.com',
+            password='owner12345',
+            first_name='Owner',
+            last_name='User',
+            user_type='venue_owner',
+        )
+        self.client.force_authenticate(user=self.admin)
+
+    def test_admin_dashboard_counts_approved_venues_as_active(self):
+        Venue.objects.create(
+            owner=self.owner,
+            name='Approved Admin Venue',
+            description='Approved venue',
+            address='1 Test Street',
+            city='Sydney',
+            state='NSW',
+            postcode='2000',
+            sport_categories=['Tennis'],
+            status='approved',
+        )
+        Venue.objects.create(
+            owner=self.owner,
+            name='Pending Admin Venue',
+            description='Pending venue',
+            address='2 Test Street',
+            city='Sydney',
+            state='NSW',
+            postcode='2000',
+            sport_categories=['Tennis'],
+            status='pending',
+        )
+
+        response = self.client.get('/api/core/admin/dashboard-stats/')
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.data['venues']['total'], 2)
+        self.assertEqual(response.data['venues']['active'], 1)
+        self.assertEqual(response.data['venues']['pending'], 1)
+
+    def test_admin_can_create_event_with_json_payload(self):
+        payload = {
+            'title': 'JSON Tennis Social',
+            'description': 'Created through JSON payload',
+            'event_type': 'social',
+            'sport_category': 'Tennis',
+            'venue_name': 'Approved Admin Venue',
+            'address': '1 Test Street',
+            'city': 'Sydney',
+            'state': 'NSW',
+            'postcode': '2000',
+            'country': 'Australia',
+            'latitude': '-33.8688',
+            'longitude': '151.2093',
+            'start_date': str(date.today() + timedelta(days=7)),
+            'end_date': str(date.today() + timedelta(days=7)),
+            'start_time': '18:00',
+            'end_time': '20:00',
+            'max_participants': 16,
+            'min_participants': 2,
+            'entry_fee': '0.00',
+            'currency': 'AUD',
+            'status': 'published',
+            'is_public': True,
+            'is_registration_open': True,
+        }
+
+        response = self.client.post('/api/events/', payload, format='json')
+
+        self.assertEqual(response.status_code, 201)
+        self.assertEqual(response.data['title'], 'JSON Tennis Social')
+        self.assertEqual(Event.objects.filter(title='JSON Tennis Social').count(), 1)

@@ -185,7 +185,7 @@ const VenueOwnerDashboard = () => {
                 <Plus className="mr-2 h-4 w-4" />
                 Add Venue
               </Link>
-              <Link to="/venues/manage" className="btn btn-outline border-white/25 text-white hover:bg-white/10">
+              <Link to="/venues/manage" className="btn btn-on-dark">
                 Manage Venues
               </Link>
             </div>

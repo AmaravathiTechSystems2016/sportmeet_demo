@@ -109,7 +109,7 @@ const PlayerDashboard = () => {
                   <Plus className="mr-2 h-4 w-4" />
                   Book a Venue
                 </Link>
-                <Link to="/events" className="btn btn-outline border-white/25 text-white hover:bg-white/10">
+                <Link to="/events" className="btn btn-on-dark">
                   Explore Events
                 </Link>
               </div>
